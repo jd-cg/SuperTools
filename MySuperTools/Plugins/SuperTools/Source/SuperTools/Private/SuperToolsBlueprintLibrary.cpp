@@ -212,6 +212,52 @@ FString USuperToolsBlueprintLibrary::BytesToString(const TArray<uint8>& Data)
 	return FString(Converter.Length(), Converter.Get());
 }
 
+// ==================== UDP 简化接口 ====================
+
+int32 USuperToolsBlueprintLibrary::StartUdpReceive(int32 Port)
+{
+	return FUdpHelper::CreateListenerWithBuffer(Port, 100);
+}
+
+void USuperToolsBlueprintLibrary::StopUdpReceive(int32 Handle)
+{
+	FUdpHelper::DestroyListener(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::GetUdpMessage(int32 Handle, FString& OutMessage, FString& OutSenderIP, int32& OutSenderPort)
+{
+	FUdpReceivedPacket Packet;
+	if (!FUdpHelper::GetLatestPacket(Handle, Packet))
+	{
+		OutMessage = FString();
+		OutSenderIP = FString();
+		OutSenderPort = 0;
+		return false;
+	}
+
+	// 清空缓冲区
+	FUdpHelper::ClearReceivedBuffer(Handle);
+
+	// 转换为字符串
+	OutMessage = BytesToString(Packet.Data);
+	OutSenderIP = Packet.SenderIP;
+	OutSenderPort = Packet.SenderPort;
+	return true;
+}
+
+TArray<FString> USuperToolsBlueprintLibrary::GetAllUdpMessages(int32 Handle)
+{
+	TArray<FString> Messages;
+	TArray<FUdpReceivedPacket> Packets = FUdpHelper::GetAndClearReceivedPackets(Handle);
+
+	for (const FUdpReceivedPacket& Packet : Packets)
+	{
+		Messages.Add(BytesToString(Packet.Data));
+	}
+
+	return Messages;
+}
+
 // ==================== 串口通信 ====================
 
 int32 USuperToolsBlueprintLibrary::OpenSerialPort(const FString& PortName, int32 BaudRate)

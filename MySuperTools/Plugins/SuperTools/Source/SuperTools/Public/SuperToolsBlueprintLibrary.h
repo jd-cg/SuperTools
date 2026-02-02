@@ -276,6 +276,43 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SuperTools|UDP", meta = (DisplayName = "字节转字符串", Keywords = "bytes string convert 字节 字符串 转换"))
 	static FString BytesToString(const TArray<uint8>& Data);
 
+	// ==================== UDP 简化接口 ====================
+	// 更易用的 UDP 接收接口，适合大多数使用场景
+
+	/**
+	 * 开始 UDP 接收 (简化版)
+	 * @param Port 监听端口
+	 * @return 句柄, -1 表示失败
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "开始UDP接收", Keywords = "udp receive start 接收 开始"))
+	static int32 StartUdpReceive(int32 Port);
+
+	/**
+	 * 停止 UDP 接收
+	 * @param Handle 句柄
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "停止UDP接收", Keywords = "udp receive stop 接收 停止"))
+	static void StopUdpReceive(int32 Handle);
+
+	/**
+	 * 获取 UDP 消息 (字符串格式，自动清空缓冲区)
+	 * @param Handle 句柄
+	 * @param OutMessage 输出消息
+	 * @param OutSenderIP 输出发送方 IP
+	 * @param OutSenderPort 输出发送方端口
+	 * @return 是否有消息
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "获取UDP消息", Keywords = "udp message get 消息 获取"))
+	static bool GetUdpMessage(int32 Handle, FString& OutMessage, FString& OutSenderIP, int32& OutSenderPort);
+
+	/**
+	 * 获取所有 UDP 消息 (字符串数组)
+	 * @param Handle 句柄
+	 * @return 消息字符串数组
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "获取所有UDP消息", Keywords = "udp messages get all 消息 获取 所有"))
+	static TArray<FString> GetAllUdpMessages(int32 Handle);
+
 	// ==================== 串口通信 ====================
 	// 注意: 串口功能仅在 Windows 平台完整可用
 
