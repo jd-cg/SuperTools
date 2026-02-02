@@ -5,6 +5,14 @@
 #include "Misc/Paths.h"
 #include "Misc/DateTime.h"
 
+// 取消 Windows API 宏定义，避免与我们的函数名冲突
+#ifdef GetComputerName
+#undef GetComputerName
+#endif
+#ifdef GetUserName
+#undef GetUserName
+#endif
+
 bool FSystemHelper::OpenURL(const FString& URL)
 {
 	FPlatformProcess::LaunchURL(*URL, nullptr, nullptr);
