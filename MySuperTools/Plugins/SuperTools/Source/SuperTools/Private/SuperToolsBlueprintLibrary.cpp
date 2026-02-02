@@ -5,6 +5,10 @@
 #include "Utils/WindowsAPIHelper.h"
 #include "Utils/UdpHelper.h"
 #include "Utils/SerialPortHelper.h"
+#include "Utils/ClipboardHelper.h"
+#include "Utils/FileDialogHelper.h"
+#include "Utils/SystemHelper.h"
+#include "Utils/DataHelper.h"
 
 // ==================== INI 文件操作 ====================
 
@@ -313,4 +317,137 @@ bool USuperToolsBlueprintLibrary::FlushSerialBuffers(int32 Handle, bool bClearIn
 TArray<FString> USuperToolsBlueprintLibrary::GetAvailableSerialPorts()
 {
 	return FSerialPortHelper::GetAvailablePorts();
+}
+
+// ==================== 剪贴板操作 ====================
+
+bool USuperToolsBlueprintLibrary::CopyToClipboard(const FString& Text)
+{
+	return FClipboardHelper::CopyToClipboard(Text);
+}
+
+bool USuperToolsBlueprintLibrary::GetFromClipboard(FString& OutText)
+{
+	return FClipboardHelper::GetFromClipboard(OutText);
+}
+
+bool USuperToolsBlueprintLibrary::HasClipboardText()
+{
+	return FClipboardHelper::HasClipboardText();
+}
+
+bool USuperToolsBlueprintLibrary::ClearClipboard()
+{
+	return FClipboardHelper::ClearClipboard();
+}
+
+bool USuperToolsBlueprintLibrary::CopyImageToClipboard(const FString& ImagePath)
+{
+	return FClipboardHelper::CopyImageToClipboard(ImagePath);
+}
+
+bool USuperToolsBlueprintLibrary::GetImageFromClipboard(const FString& SavePath)
+{
+	return FClipboardHelper::GetImageFromClipboard(SavePath);
+}
+
+bool USuperToolsBlueprintLibrary::HasClipboardImage()
+{
+	return FClipboardHelper::HasClipboardImage();
+}
+
+// ==================== 文件对话框 ====================
+
+bool USuperToolsBlueprintLibrary::OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, FString& OutFilePath)
+{
+	return FFileDialogHelper::OpenFileDialog(DialogTitle, DefaultPath, FileTypes, OutFilePath);
+}
+
+bool USuperToolsBlueprintLibrary::OpenFileDialogMultiple(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFilePaths)
+{
+	return FFileDialogHelper::OpenFileDialogMultiple(DialogTitle, DefaultPath, FileTypes, OutFilePaths);
+}
+
+bool USuperToolsBlueprintLibrary::SaveFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& DefaultFileName, const FString& FileTypes, FString& OutFilePath)
+{
+	return FFileDialogHelper::SaveFileDialog(DialogTitle, DefaultPath, DefaultFileName, FileTypes, OutFilePath);
+}
+
+bool USuperToolsBlueprintLibrary::OpenFolderDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderPath)
+{
+	return FFileDialogHelper::OpenFolderDialog(DialogTitle, DefaultPath, OutFolderPath);
+}
+
+// ==================== 系统操作 ====================
+
+bool USuperToolsBlueprintLibrary::OpenURL(const FString& URL)
+{
+	return FSystemHelper::OpenURL(URL);
+}
+
+bool USuperToolsBlueprintLibrary::OpenFolderInExplorer(const FString& FolderPath)
+{
+	return FSystemHelper::OpenFolder(FolderPath);
+}
+
+bool USuperToolsBlueprintLibrary::OpenFileWithDefaultApp(const FString& FilePath)
+{
+	return FSystemHelper::OpenFile(FilePath);
+}
+
+bool USuperToolsBlueprintLibrary::LaunchApplication(const FString& ExecutablePath, const FString& Arguments, bool bHidden)
+{
+	return FSystemHelper::LaunchApplication(ExecutablePath, Arguments, bHidden);
+}
+
+FString USuperToolsBlueprintLibrary::GetEnvVariable(const FString& VariableName)
+{
+	return FSystemHelper::GetEnvironmentVariable(VariableName);
+}
+
+FString USuperToolsBlueprintLibrary::GetFormattedTime(const FString& Format)
+{
+	return FSystemHelper::GetFormattedTime(Format);
+}
+
+FString USuperToolsBlueprintLibrary::GetComputerName()
+{
+	return FSystemHelper::GetComputerName();
+}
+
+FString USuperToolsBlueprintLibrary::GetCurrentUserName()
+{
+	return FSystemHelper::GetUserName();
+}
+
+// ==================== 数据处理 ====================
+
+FString USuperToolsBlueprintLibrary::Base64Encode(const FString& Input)
+{
+	return FDataHelper::Base64Encode(Input);
+}
+
+bool USuperToolsBlueprintLibrary::Base64Decode(const FString& Input, FString& OutDecoded)
+{
+	return FDataHelper::Base64Decode(Input, OutDecoded);
+}
+
+FString USuperToolsBlueprintLibrary::MD5Hash(const FString& Input)
+{
+	return FDataHelper::MD5Hash(Input);
+}
+
+FString USuperToolsBlueprintLibrary::SHA256Hash(const FString& Input)
+{
+	return FDataHelper::SHA256Hash(Input);
+}
+
+bool USuperToolsBlueprintLibrary::MD5HashFile(const FString& FilePath, FString& OutHash)
+{
+	return FDataHelper::MD5HashFile(FilePath, OutHash);
+}
+
+bool USuperToolsBlueprintLibrary::SHA256HashFile(const FString& FilePath, FString& OutHash)
+{
+	return FDataHelper::SHA256HashFile(FilePath, OutHash);
 }

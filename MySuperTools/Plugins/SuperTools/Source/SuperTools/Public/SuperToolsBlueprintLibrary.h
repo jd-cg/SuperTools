@@ -6,6 +6,10 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Utils/SerialPortHelper.h"
 #include "Utils/UdpHelper.h"
+#include "Utils/ClipboardHelper.h"
+#include "Utils/FileDialogHelper.h"
+#include "Utils/SystemHelper.h"
+#include "Utils/DataHelper.h"
 #include "SuperToolsBlueprintLibrary.generated.h"
 
 /**
@@ -410,4 +414,224 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "Get Available Serial Ports", Keywords = "serial port list available 串口 列表 可用"))
 	static TArray<FString> GetAvailableSerialPorts();
+
+	// ==================== 剪贴板操作 ====================
+
+	/**
+	 * 复制文本到剪贴板
+	 * @param Text 要复制的文本
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Clipboard", meta = (DisplayName = "Copy To Clipboard", Keywords = "clipboard copy text 剪贴板 复制 文本"))
+	static bool CopyToClipboard(const FString& Text);
+
+	/**
+	 * 从剪贴板获取文本
+	 * @param OutText 输出的文本
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Clipboard", meta = (DisplayName = "Get From Clipboard", Keywords = "clipboard paste get text 剪贴板 粘贴 获取 文本"))
+	static bool GetFromClipboard(FString& OutText);
+
+	/**
+	 * 检查剪贴板是否有文本
+	 * @return 剪贴板是否包含文本
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|Clipboard", meta = (DisplayName = "Has Clipboard Text", Keywords = "clipboard has text 剪贴板 有 文本"))
+	static bool HasClipboardText();
+
+	/**
+	 * 清空剪贴板
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Clipboard", meta = (DisplayName = "Clear Clipboard", Keywords = "clipboard clear 剪贴板 清空"))
+	static bool ClearClipboard();
+
+	/**
+	 * 复制图像文件到剪贴板
+	 * @param ImagePath 图像文件路径 (支持 PNG, BMP, JPG)
+	 * @return 是否操作成功 (非 Windows 平台返回 false)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Clipboard", meta = (DisplayName = "Copy Image To Clipboard", Keywords = "clipboard copy image 剪贴板 复制 图像 图片"))
+	static bool CopyImageToClipboard(const FString& ImagePath);
+
+	/**
+	 * 从剪贴板获取图像并保存到文件
+	 * @param SavePath 保存路径 (支持 PNG, BMP, JPG)
+	 * @return 是否操作成功 (非 Windows 平台返回 false)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Clipboard", meta = (DisplayName = "Get Image From Clipboard", Keywords = "clipboard paste get image 剪贴板 粘贴 获取 图像 图片"))
+	static bool GetImageFromClipboard(const FString& SavePath);
+
+	/**
+	 * 检查剪贴板是否有图像
+	 * @return 剪贴板是否包含图像 (非 Windows 平台返回 false)
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|Clipboard", meta = (DisplayName = "Has Clipboard Image", Keywords = "clipboard has image 剪贴板 有 图像 图片"))
+	static bool HasClipboardImage();
+
+	// ==================== 文件对话框 ====================
+
+	/**
+	 * 打开文件对话框 (单个文件)
+	 * @param DialogTitle 对话框标题
+	 * @param DefaultPath 默认路径
+	 * @param FileTypes 文件类型过滤器
+	 * @param OutFilePath 输出选中的文件路径
+	 * @return 是否选择了文件
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileDialog", meta = (DisplayName = "Open File Dialog", Keywords = "file dialog open 文件 对话框 打开"))
+	static bool OpenFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, FString& OutFilePath);
+
+	/**
+	 * 打开文件对话框 (多个文件)
+	 * @param DialogTitle 对话框标题
+	 * @param DefaultPath 默认路径
+	 * @param FileTypes 文件类型过滤器
+	 * @param OutFilePaths 输出选中的文件路径数组
+	 * @return 是否选择了文件
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileDialog", meta = (DisplayName = "Open File Dialog Multiple", Keywords = "file dialog open multiple 文件 对话框 打开 多个"))
+	static bool OpenFileDialogMultiple(const FString& DialogTitle, const FString& DefaultPath, const FString& FileTypes, TArray<FString>& OutFilePaths);
+
+	/**
+	 * 保存文件对话框
+	 * @param DialogTitle 对话框标题
+	 * @param DefaultPath 默认路径
+	 * @param DefaultFileName 默认文件名
+	 * @param FileTypes 文件类型过滤器
+	 * @param OutFilePath 输出选中的文件路径
+	 * @return 是否选择了路径
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileDialog", meta = (DisplayName = "Save File Dialog", Keywords = "file dialog save 文件 对话框 保存"))
+	static bool SaveFileDialog(const FString& DialogTitle, const FString& DefaultPath, const FString& DefaultFileName, const FString& FileTypes, FString& OutFilePath);
+
+	/**
+	 * 打开文件夹对话框
+	 * @param DialogTitle 对话框标题
+	 * @param DefaultPath 默认路径
+	 * @param OutFolderPath 输出选中的文件夹路径
+	 * @return 是否选择了文件夹
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileDialog", meta = (DisplayName = "Open Folder Dialog", Keywords = "folder dialog open 文件夹 对话框 打开"))
+	static bool OpenFolderDialog(const FString& DialogTitle, const FString& DefaultPath, FString& OutFolderPath);
+
+	// ==================== 系统操作 ====================
+
+	/**
+	 * 在默认浏览器中打开 URL
+	 * @param URL 要打开的 URL
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|System", meta = (DisplayName = "Open URL", Keywords = "url open browser 打开 浏览器"))
+	static bool OpenURL(const FString& URL);
+
+	/**
+	 * 在文件资源管理器中打开文件夹
+	 * @param FolderPath 要打开的文件夹路径
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|System", meta = (DisplayName = "Open Folder In Explorer", Keywords = "folder open explorer 文件夹 打开 资源管理器"))
+	static bool OpenFolderInExplorer(const FString& FolderPath);
+
+	/**
+	 * 使用默认应用程序打开文件
+	 * @param FilePath 要打开的文件路径
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|System", meta = (DisplayName = "Open File With Default App", Keywords = "file open default app 文件 打开 默认 应用"))
+	static bool OpenFileWithDefaultApp(const FString& FilePath);
+
+	/**
+	 * 启动外部应用程序
+	 * @param ExecutablePath 可执行文件路径
+	 * @param Arguments 命令行参数
+	 * @param bHidden 是否隐藏运行
+	 * @return 是否操作成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|System", meta = (DisplayName = "Launch Application", Keywords = "launch app application 启动 应用 程序"))
+	static bool LaunchApplication(const FString& ExecutablePath, const FString& Arguments = TEXT(""), bool bHidden = false);
+
+	/**
+	 * 获取环境变量
+	 * @param VariableName 环境变量名称
+	 * @return 环境变量值
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|System", meta = (DisplayName = "Get Environment Variable", Keywords = "environment variable get 环境变量 获取"))
+	static FString GetEnvVariable(const FString& VariableName);
+
+	/**
+	 * 获取格式化的当前时间
+	 * @param Format 时间格式字符串
+	 * @return 格式化的时间字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|System", meta = (DisplayName = "Get Formatted Time", Keywords = "time format get 时间 格式化 获取"))
+	static FString GetFormattedTime(const FString& Format = TEXT("%Y-%m-%d %H:%M:%S"));
+
+	/**
+	 * 获取计算机名称
+	 * @return 计算机名称
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|System", meta = (DisplayName = "Get Computer Name", Keywords = "computer name get 计算机 名称 获取"))
+	static FString GetComputerName();
+
+	/**
+	 * 获取当前用户名
+	 * @return 当前用户名
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|System", meta = (DisplayName = "Get User Name", Keywords = "user name get 用户名 获取"))
+	static FString GetCurrentUserName();
+
+	// ==================== 数据处理 ====================
+
+	/**
+	 * 将字符串编码为 Base64
+	 * @param Input 输入字符串
+	 * @return Base64 编码后的字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|Data", meta = (DisplayName = "Base64 Encode", Keywords = "base64 encode 编码"))
+	static FString Base64Encode(const FString& Input);
+
+	/**
+	 * 解码 Base64 字符串
+	 * @param Input Base64 编码的字符串
+	 * @param OutDecoded 输出解码后的字符串
+	 * @return 是否解码成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Data", meta = (DisplayName = "Base64 Decode", Keywords = "base64 decode 解码"))
+	static bool Base64Decode(const FString& Input, FString& OutDecoded);
+
+	/**
+	 * 计算字符串的 MD5 哈希值
+	 * @param Input 输入字符串
+	 * @return MD5 哈希值 (32 字符十六进制字符串)
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|Data", meta = (DisplayName = "MD5 Hash", Keywords = "md5 hash 哈希"))
+	static FString MD5Hash(const FString& Input);
+
+	/**
+	 * 计算字符串的 SHA256 哈希值
+	 * @param Input 输入字符串
+	 * @return SHA256 哈希值 (64 字符十六进制字符串)
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|Data", meta = (DisplayName = "SHA256 Hash", Keywords = "sha256 hash 哈希"))
+	static FString SHA256Hash(const FString& Input);
+
+	/**
+	 * 计算文件的 MD5 哈希值
+	 * @param FilePath 文件路径
+	 * @param OutHash 输出哈希值
+	 * @return 是否计算成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Data", meta = (DisplayName = "MD5 Hash File", Keywords = "md5 hash file 哈希 文件"))
+	static bool MD5HashFile(const FString& FilePath, FString& OutHash);
+
+	/**
+	 * 计算文件的 SHA256 哈希值
+	 * @param FilePath 文件路径
+	 * @param OutHash 输出哈希值
+	 * @return 是否计算成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Data", meta = (DisplayName = "SHA256 Hash File", Keywords = "sha256 hash file 哈希 文件"))
+	static bool SHA256HashFile(const FString& FilePath, FString& OutHash);
 };
