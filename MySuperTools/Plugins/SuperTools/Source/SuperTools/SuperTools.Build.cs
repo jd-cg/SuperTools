@@ -20,7 +20,13 @@ public class SuperTools : ModuleRules
 				"SlateCore",
 				"ApplicationCore",
 				"Sockets",
-				"Networking"
+				"Networking",
+				"DesktopPlatform",
+				"ImageWrapper",
+				"Json",
+				"JsonUtilities",
+				"HTTP",
+				"RenderCore"
 			}
 		);
 	}
