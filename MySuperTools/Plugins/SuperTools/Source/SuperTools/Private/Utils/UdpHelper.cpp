@@ -191,6 +191,190 @@ int32 FUdpHelper::GetActiveListenerCount()
 	return Listeners.Num();
 }
 
+int32 FUdpHelper::CreateListenerWithBuffer(int32 Port, int32 MaxBufferSize)
+{
+	// 创建一个内部回调，将数据存入缓冲区
+	FOnUdpDataReceived BufferCallback;
+
+	FScopeLock Lock(&ListenerLock);
+
+	// 创建监听 Socket
+	FIPv4Endpoint Endpoint(FIPv4Address::Any, Port);
+
+	FSocket* Socket = FUdpSocketBuilder(TEXT("UDP Listener"))
+		.AsNonBlocking()
+		.AsReusable()
+		.BoundToEndpoint(Endpoint)
+		.WithReceiveBufferSize(65535)
+		.Build();
+
+	if (!Socket)
+	{
+		UE_LOG(LogSuperTools, Error, TEXT("UDP 监听器创建失败: 无法绑定到端口 %d"), Port);
+		return -1;
+	}
+
+	// 创建监听器信息
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = MakeShared<FUdpListenerInfo>();
+	ListenerInfo->Socket = Socket;
+	ListenerInfo->Port = Port;
+	ListenerInfo->MaxBufferSize = MaxBufferSize;
+
+	// 分配句柄
+	int32 Handle = NextHandleId++;
+
+	// 创建接收器
+	FTimespan ThreadWaitTime = FTimespan::FromMilliseconds(100);
+	ListenerInfo->Receiver = new FUdpSocketReceiver(
+		Socket,
+		ThreadWaitTime,
+		*FString::Printf(TEXT("UDP Receiver %d"), Handle)
+	);
+
+	// 绑定接收回调 - 使用缓冲区版本
+	ListenerInfo->Receiver->OnDataReceived().BindStatic(&FUdpHelper::HandleDataReceivedToBuffer, Handle);
+
+	// 启动接收器
+	ListenerInfo->Receiver->Start();
+
+	// 保存到映射表
+	Listeners.Add(Handle, ListenerInfo);
+
+	UE_LOG(LogSuperTools, Log, TEXT("UDP 监听器创建成功 (缓冲模式): 句柄 %d, 端口 %d, 缓冲区大小 %d"), Handle, Port, MaxBufferSize);
+
+	return Handle;
+}
+
+bool FUdpHelper::HasReceivedData(int32 Handle)
+{
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return false;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+	FScopeLock BufferLock(&ListenerInfo->BufferLock);
+	return ListenerInfo->ReceivedBuffer.Num() > 0;
+}
+
+int32 FUdpHelper::GetReceivedPacketCount(int32 Handle)
+{
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return 0;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+	FScopeLock BufferLock(&ListenerInfo->BufferLock);
+	return ListenerInfo->ReceivedBuffer.Num();
+}
+
+TArray<FUdpReceivedPacket> FUdpHelper::GetAndClearReceivedPackets(int32 Handle)
+{
+	TArray<FUdpReceivedPacket> Result;
+
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return Result;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+	FScopeLock BufferLock(&ListenerInfo->BufferLock);
+
+	Result = MoveTemp(ListenerInfo->ReceivedBuffer);
+	ListenerInfo->ReceivedBuffer.Empty();
+
+	return Result;
+}
+
+bool FUdpHelper::GetLatestPacket(int32 Handle, FUdpReceivedPacket& OutPacket)
+{
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return false;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+	FScopeLock BufferLock(&ListenerInfo->BufferLock);
+
+	if (ListenerInfo->ReceivedBuffer.Num() == 0)
+	{
+		return false;
+	}
+
+	OutPacket = ListenerInfo->ReceivedBuffer.Last();
+	return true;
+}
+
+void FUdpHelper::ClearReceivedBuffer(int32 Handle)
+{
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+	FScopeLock BufferLock(&ListenerInfo->BufferLock);
+	ListenerInfo->ReceivedBuffer.Empty();
+}
+
+void FUdpHelper::HandleDataReceivedToBuffer(const TSharedPtr<FArrayReader, ESPMode::ThreadSafe>& Data, const FIPv4Endpoint& Sender, int32 Handle)
+{
+	FScopeLock Lock(&ListenerLock);
+
+	TSharedPtr<FUdpListenerInfo>* ListenerInfoPtr = Listeners.Find(Handle);
+	if (!ListenerInfoPtr || !ListenerInfoPtr->IsValid())
+	{
+		return;
+	}
+
+	TSharedPtr<FUdpListenerInfo> ListenerInfo = *ListenerInfoPtr;
+
+	// 提取发送方信息
+	FString SenderIP = Sender.Address.ToString();
+	int32 SenderPort = Sender.Port;
+
+	// 复制数据
+	TArray<uint8> ReceivedData;
+	int64 DataSize = Data->TotalSize();
+	if (DataSize > 0)
+	{
+		ReceivedData.SetNumUninitialized(DataSize);
+		Data->Seek(0);
+		Data->Serialize(ReceivedData.GetData(), DataSize);
+	}
+
+	// 添加到缓冲区
+	{
+		FScopeLock BufferLock(&ListenerInfo->BufferLock);
+
+		// 如果缓冲区已满，移除最旧的数据
+		while (ListenerInfo->ReceivedBuffer.Num() >= ListenerInfo->MaxBufferSize)
+		{
+			ListenerInfo->ReceivedBuffer.RemoveAt(0);
+		}
+
+		ListenerInfo->ReceivedBuffer.Add(FUdpReceivedPacket(SenderIP, SenderPort, ReceivedData));
+	}
+
+	UE_LOG(LogSuperTools, Verbose, TEXT("UDP 接收数据 (缓冲): %d 字节, 来自 %s:%d"), ReceivedData.Num(), *SenderIP, SenderPort);
+}
+
 void FUdpHelper::HandleDataReceived(const TSharedPtr<FArrayReader, ESPMode::ThreadSafe>& Data, const FIPv4Endpoint& Sender, int32 Handle)
 {
 	FOnUdpDataReceived CallbackCopy;

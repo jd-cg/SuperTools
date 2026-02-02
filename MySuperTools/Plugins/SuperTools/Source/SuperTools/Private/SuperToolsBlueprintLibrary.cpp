@@ -160,6 +160,58 @@ bool USuperToolsBlueprintLibrary::UdpSendString(const FString& IP, int32 Port, c
 	return FUdpHelper::SendStringTo(IP, Port, Message);
 }
 
+int32 USuperToolsBlueprintLibrary::CreateUdpListener(int32 Port, int32 MaxBufferSize)
+{
+	return FUdpHelper::CreateListenerWithBuffer(Port, MaxBufferSize);
+}
+
+void USuperToolsBlueprintLibrary::DestroyUdpListener(int32 Handle)
+{
+	FUdpHelper::DestroyListener(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::IsUdpListenerValid(int32 Handle)
+{
+	return FUdpHelper::IsListenerValid(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::HasUdpData(int32 Handle)
+{
+	return FUdpHelper::HasReceivedData(Handle);
+}
+
+int32 USuperToolsBlueprintLibrary::GetUdpPacketCount(int32 Handle)
+{
+	return FUdpHelper::GetReceivedPacketCount(Handle);
+}
+
+TArray<FUdpReceivedPacket> USuperToolsBlueprintLibrary::GetAllUdpPackets(int32 Handle)
+{
+	return FUdpHelper::GetAndClearReceivedPackets(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::GetLatestUdpPacket(int32 Handle, FUdpReceivedPacket& OutPacket)
+{
+	return FUdpHelper::GetLatestPacket(Handle, OutPacket);
+}
+
+void USuperToolsBlueprintLibrary::ClearUdpBuffer(int32 Handle)
+{
+	FUdpHelper::ClearReceivedBuffer(Handle);
+}
+
+FString USuperToolsBlueprintLibrary::BytesToString(const TArray<uint8>& Data)
+{
+	if (Data.Num() == 0)
+	{
+		return FString();
+	}
+
+	// 将 UTF-8 字节数组转换为 FString
+	FUTF8ToTCHAR Converter((const ANSICHAR*)Data.GetData(), Data.Num());
+	return FString(Converter.Length(), Converter.Get());
+}
+
 // ==================== 串口通信 ====================
 
 int32 USuperToolsBlueprintLibrary::OpenSerialPort(const FString& PortName, int32 BaudRate)

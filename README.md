@@ -28,9 +28,11 @@ SuperTools provides commonly used utility functions including INI file operation
 ### UDP Communication
 
 - Send UDP bytes and strings to specified IP:Port
-- Create async UDP listeners with callback delegates
+- Create async UDP listeners with buffer-based polling
+- Blueprint-friendly receive interface with `FUdpReceivedPacket` struct
 - Multiple listener management with handle-based API
 - Thread-safe implementation
+- Utility function to convert bytes to string
 
 ### Serial Port Communication
 

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "Utils/SerialPortHelper.h"
+#include "Utils/UdpHelper.h"
 #include "SuperToolsBlueprintLibrary.generated.h"
 
 /**
@@ -202,6 +203,78 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "发送UDP字符串", Keywords = "udp send string 发送 字符串"))
 	static bool UdpSendString(const FString& IP, int32 Port, const FString& Message);
+
+	/**
+	 * 创建 UDP 监听器
+	 * @param Port 监听端口
+	 * @param MaxBufferSize 最大缓冲区大小 (默认 100)
+	 * @return 监听器句柄, -1 表示创建失败
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "创建UDP监听器", Keywords = "udp listener create 监听器 创建"))
+	static int32 CreateUdpListener(int32 Port, int32 MaxBufferSize = 100);
+
+	/**
+	 * 销毁 UDP 监听器
+	 * @param Handle 监听器句柄
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "销毁UDP监听器", Keywords = "udp listener destroy 监听器 销毁"))
+	static void DestroyUdpListener(int32 Handle);
+
+	/**
+	 * 检查 UDP 监听器是否有效
+	 * @param Handle 监听器句柄
+	 * @return 是否有效
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|UDP", meta = (DisplayName = "UDP监听器是否有效", Keywords = "udp listener valid 监听器 有效"))
+	static bool IsUdpListenerValid(int32 Handle);
+
+	/**
+	 * 检查是否有接收到的 UDP 数据
+	 * @param Handle 监听器句柄
+	 * @return 是否有数据
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|UDP", meta = (DisplayName = "是否有UDP数据", Keywords = "udp data has 数据 有"))
+	static bool HasUdpData(int32 Handle);
+
+	/**
+	 * 获取接收到的 UDP 数据包数量
+	 * @param Handle 监听器句柄
+	 * @return 数据包数量
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|UDP", meta = (DisplayName = "获取UDP数据包数量", Keywords = "udp packet count 数据包 数量"))
+	static int32 GetUdpPacketCount(int32 Handle);
+
+	/**
+	 * 获取并清空所有接收到的 UDP 数据包
+	 * @param Handle 监听器句柄
+	 * @return 接收到的数据包数组
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "获取所有UDP数据包", Keywords = "udp packet get all 数据包 获取"))
+	static TArray<FUdpReceivedPacket> GetAllUdpPackets(int32 Handle);
+
+	/**
+	 * 获取最新的 UDP 数据包
+	 * @param Handle 监听器句柄
+	 * @param OutPacket 输出数据包
+	 * @return 是否成功获取
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "获取最新UDP数据包", Keywords = "udp packet get latest 数据包 最新"))
+	static bool GetLatestUdpPacket(int32 Handle, FUdpReceivedPacket& OutPacket);
+
+	/**
+	 * 清空 UDP 接收缓冲区
+	 * @param Handle 监听器句柄
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "清空UDP缓冲区", Keywords = "udp buffer clear 缓冲区 清空"))
+	static void ClearUdpBuffer(int32 Handle);
+
+	/**
+	 * 将字节数组转换为字符串 (UTF-8)
+	 * @param Data 字节数组
+	 * @return 转换后的字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|UDP", meta = (DisplayName = "字节转字符串", Keywords = "bytes string convert 字节 字符串 转换"))
+	static FString BytesToString(const TArray<uint8>& Data);
 
 	// ==================== 串口通信 ====================
 	// 注意: 串口功能仅在 Windows 平台完整可用
