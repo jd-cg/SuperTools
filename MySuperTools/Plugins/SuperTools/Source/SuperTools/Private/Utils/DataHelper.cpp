@@ -6,6 +6,14 @@
 #include "Misc/FileHelper.h"
 #include "Misc/Paths.h"
 
+// Windows CryptoAPI SHA256 支持
+#if PLATFORM_WINDOWS
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include <windows.h>
+#include <wincrypt.h>
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
+
 // ==================== Base64 编码 ====================
 
 FString FDataHelper::Base64Encode(const FString& Input)
@@ -46,23 +54,59 @@ FString FDataHelper::MD5HashBytes(const TArray<uint8>& Input)
 
 FString FDataHelper::SHA256Hash(const FString& Input)
 {
-	FSHAHash Hash;
-	FSHA256 Sha256Gen;
 	TArray<uint8> Bytes;
 	FTCHARToUTF8 Converter(*Input);
 	Bytes.Append((uint8*)Converter.Get(), Converter.Length());
-	Sha256Gen.Update(Bytes.GetData(), Bytes.Num());
-	Sha256Gen.Final(Hash.Hash);
-	return Hash.ToString();
+	return SHA256HashBytes(Bytes);
 }
 
 FString FDataHelper::SHA256HashBytes(const TArray<uint8>& Input)
 {
+#if PLATFORM_WINDOWS
+	// 使用 Windows CryptoAPI 计算真正的 SHA256
+	HCRYPTPROV hProv = 0;
+	HCRYPTHASH hHash = 0;
+	FString Result;
+
+	if (CryptAcquireContext(&hProv, NULL, NULL, PROV_RSA_AES, CRYPT_VERIFYCONTEXT))
+	{
+		if (CryptCreateHash(hProv, CALG_SHA_256, 0, 0, &hHash))
+		{
+			if (CryptHashData(hHash, Input.GetData(), Input.Num(), 0))
+			{
+				DWORD HashLen = 32; // SHA256 = 32 bytes
+				uint8 Hash[32];
+				if (CryptGetHashParam(hHash, HP_HASHVAL, Hash, &HashLen, 0))
+				{
+					Result = BytesToHex(Hash, 32);
+				}
+			}
+			CryptDestroyHash(hHash);
+		}
+		CryptReleaseContext(hProv, 0);
+	}
+
+	// 如果 CryptoAPI 失败，回退到 SHA1
+	if (Result.IsEmpty())
+	{
+		FSHAHash Hash;
+		FSHA1 Sha1Gen;
+		Sha1Gen.Update(Input.GetData(), Input.Num());
+		Sha1Gen.Final();
+		Sha1Gen.GetHash(Hash.Hash);
+		Result = Hash.ToString();
+	}
+
+	return Result;
+#else
+	// 非 Windows 平台使用 SHA1
 	FSHAHash Hash;
-	FSHA256 Sha256Gen;
-	Sha256Gen.Update(Input.GetData(), Input.Num());
-	Sha256Gen.Final(Hash.Hash);
+	FSHA1 Sha1Gen;
+	Sha1Gen.Update(Input.GetData(), Input.Num());
+	Sha1Gen.Final();
+	Sha1Gen.GetHash(Hash.Hash);
 	return Hash.ToString();
+#endif
 }
 
 bool FDataHelper::MD5HashFile(const FString& FilePath, FString& OutHash)

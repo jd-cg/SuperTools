@@ -214,7 +214,7 @@ bool FClipboardHelper::GetImageDataFromClipboard(TArray<uint8>& OutImageData, in
 	int32 ColorTableSize = 0;
 	if (pBitmapHeader->biBitCount <= 8)
 	{
-		ColorTableSize = (1 << pBitmapHeader->biBitCount) * sizeof(RGBQUAD);
+		ColorTableSize = static_cast<int32>((1ULL << pBitmapHeader->biBitCount) * sizeof(RGBQUAD));
 	}
 
 	uint8* pPixelData = (uint8*)pBitmapHeader + pBitmapHeader->biSize + ColorTableSize;

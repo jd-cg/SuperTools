@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "LatentActions.h"
 #include "Utils/SerialPortHelper.h"
 #include "Utils/UdpHelper.h"
 #include "Utils/ClipboardHelper.h"
@@ -699,6 +700,24 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "Make JSON String", Keywords = "json make create 创建"))
 	static FString MakeJsonString(const FString& Key, const FString& Value);
 
+	/**
+	 * 从 Map 创建 JSON 字符串
+	 * @param StringMap 字符串映射
+	 * @param bPrettyPrint 是否格式化输出
+	 * @return JSON 字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "Map To JSON", Keywords = "json map convert 转换"))
+	static FString MapToJson(const TMap<FString, FString>& StringMap, bool bPrettyPrint = false);
+
+	/**
+	 * 从 JSON 字符串解析为 Map
+	 * @param JsonString JSON 字符串
+	 * @param OutMap 输出的字符串映射
+	 * @return 是否解析成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|JSON", meta = (DisplayName = "JSON To Map", Keywords = "json map parse 解析"))
+	static bool JsonToMap(const FString& JsonString, TMap<FString, FString>& OutMap);
+
 	// ==================== 文件 I/O ====================
 
 	/**
@@ -807,6 +826,69 @@ public:
 	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Get File Name", Keywords = "file name 文件名"))
 	static FString GetFileNameFromPath(const FString& FilePath, bool bWithExtension = true);
 
+	/**
+	 * 写入多行文本到文件
+	 * @param FilePath 文件路径
+	 * @param Lines 要写入的行数组
+	 * @param bAppend 是否追加模式
+	 * @return 是否写入成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Write Lines", Keywords = "file write lines 文件 写入 行"))
+	static bool WriteFileLines(const FString& FilePath, const TArray<FString>& Lines, bool bAppend = false);
+
+	/**
+	 * 读取二进制文件
+	 * @param FilePath 文件路径
+	 * @param OutData 输出的字节数组
+	 * @return 是否读取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Read Binary File", Keywords = "file read binary 文件 读取 二进制"))
+	static bool ReadBinaryFile(const FString& FilePath, TArray<uint8>& OutData);
+
+	/**
+	 * 写入二进制文件
+	 * @param FilePath 文件路径
+	 * @param Data 要写入的字节数组
+	 * @return 是否写入成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Write Binary File", Keywords = "file write binary 文件 写入 二进制"))
+	static bool WriteBinaryFile(const FString& FilePath, const TArray<uint8>& Data);
+
+	/**
+	 * 删除目录 (包括所有内容)
+	 * @param DirectoryPath 目录路径
+	 * @return 是否删除成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Delete Directory", Keywords = "directory delete 目录 删除"))
+	static bool DeleteDirectoryAtPath(const FString& DirectoryPath);
+
+	/**
+	 * 移动/重命名文件
+	 * @param SourcePath 源文件路径
+	 * @param DestPath 目标文件路径
+	 * @return 是否移动成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Move File", Keywords = "file move rename 文件 移动 重命名"))
+	static bool MoveFileToPath(const FString& SourcePath, const FString& DestPath);
+
+	/**
+	 * 获取目录中的所有子目录
+	 * @param DirectoryPath 目录路径
+	 * @param OutDirectories 输出的目录路径数组
+	 * @param bRecursive 是否递归搜索
+	 * @return 是否获取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Get Directories In Directory", Keywords = "directory get subdirectories 目录 子目录 获取"))
+	static bool GetDirectoriesInDir(const FString& DirectoryPath, TArray<FString>& OutDirectories, bool bRecursive = false);
+
+	/**
+	 * 获取文件所在目录
+	 * @param FilePath 文件路径
+	 * @return 目录路径
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Get File Directory", Keywords = "file directory path 文件 目录 路径"))
+	static FString GetFileDir(const FString& FilePath);
+
 	// ==================== 截图 ====================
 
 	/**
@@ -846,4 +928,42 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|Screenshot", meta = (DisplayName = "Capture Region", Keywords = "screenshot capture region 截图 区域"))
 	static bool CaptureRegionToFile(const FString& FilePath, int32 X, int32 Y, int32 Width, int32 Height);
+
+	// ==================== HTTP 请求 ====================
+	// 异步 HTTP 请求，使用 Latent Action 实现
+
+	/**
+	 * 发送 HTTP GET 请求 (异步)
+	 * @param WorldContextObject 世界上下文
+	 * @param URL 请求 URL
+	 * @param OutResponse 输出的响应内容
+	 * @param OutResponseCode 输出的响应状态码
+	 * @param bOutSuccess 是否请求成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|HTTP", meta = (DisplayName = "HTTP GET", Keywords = "http get request 请求", Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	static void HttpGet(UObject* WorldContextObject, const FString& URL, FString& OutResponse, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo);
+
+	/**
+	 * 发送 HTTP POST 请求 (异步)
+	 * @param WorldContextObject 世界上下文
+	 * @param URL 请求 URL
+	 * @param Content 请求内容
+	 * @param ContentType 内容类型 (默认: application/json)
+	 * @param OutResponse 输出的响应内容
+	 * @param OutResponseCode 输出的响应状态码
+	 * @param bOutSuccess 是否请求成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|HTTP", meta = (DisplayName = "HTTP POST", Keywords = "http post request 请求", Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	static void HttpPost(UObject* WorldContextObject, const FString& URL, const FString& Content, const FString& ContentType, FString& OutResponse, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo);
+
+	/**
+	 * 下载文件 (异步)
+	 * @param WorldContextObject 世界上下文
+	 * @param URL 文件 URL
+	 * @param SavePath 保存路径
+	 * @param OutResponseCode 输出的响应状态码
+	 * @param bOutSuccess 是否下载成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|HTTP", meta = (DisplayName = "HTTP Download File", Keywords = "http download file 下载 文件", Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
+	static void HttpDownloadFile(UObject* WorldContextObject, const FString& URL, const FString& SavePath, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo);
 };

@@ -12,6 +12,9 @@
 #include "Utils/JsonHelper.h"
 #include "Utils/FileIOHelper.h"
 #include "Utils/ScreenshotHelper.h"
+#include "Utils/HttpLatentActions.h"
+#include "Engine/Engine.h"
+#include "Engine/World.h"
 
 // ==================== INI 文件操作 ====================
 
@@ -487,6 +490,16 @@ FString USuperToolsBlueprintLibrary::MakeJsonString(const FString& Key, const FS
 	return FJsonHelper::MakeJsonString(Key, Value);
 }
 
+FString USuperToolsBlueprintLibrary::MapToJson(const TMap<FString, FString>& StringMap, bool bPrettyPrint)
+{
+	return FJsonHelper::MapToJsonString(StringMap, bPrettyPrint);
+}
+
+bool USuperToolsBlueprintLibrary::JsonToMap(const FString& JsonString, TMap<FString, FString>& OutMap)
+{
+	return FJsonHelper::JsonStringToMap(JsonString, OutMap);
+}
+
 // ==================== 文件 I/O ====================
 
 bool USuperToolsBlueprintLibrary::ReadTextFile(const FString& FilePath, FString& OutContent)
@@ -549,6 +562,41 @@ FString USuperToolsBlueprintLibrary::GetFileNameFromPath(const FString& FilePath
 	return FFileIOHelper::GetFileName(FilePath, bWithExtension);
 }
 
+bool USuperToolsBlueprintLibrary::WriteFileLines(const FString& FilePath, const TArray<FString>& Lines, bool bAppend)
+{
+	return FFileIOHelper::WriteLines(FilePath, Lines, bAppend);
+}
+
+bool USuperToolsBlueprintLibrary::ReadBinaryFile(const FString& FilePath, TArray<uint8>& OutData)
+{
+	return FFileIOHelper::ReadBinaryFile(FilePath, OutData);
+}
+
+bool USuperToolsBlueprintLibrary::WriteBinaryFile(const FString& FilePath, const TArray<uint8>& Data)
+{
+	return FFileIOHelper::WriteBinaryFile(FilePath, Data);
+}
+
+bool USuperToolsBlueprintLibrary::DeleteDirectoryAtPath(const FString& DirectoryPath)
+{
+	return FFileIOHelper::DeleteDirectory(DirectoryPath);
+}
+
+bool USuperToolsBlueprintLibrary::MoveFileToPath(const FString& SourcePath, const FString& DestPath)
+{
+	return FFileIOHelper::MoveFile(SourcePath, DestPath);
+}
+
+bool USuperToolsBlueprintLibrary::GetDirectoriesInDir(const FString& DirectoryPath, TArray<FString>& OutDirectories, bool bRecursive)
+{
+	return FFileIOHelper::GetDirectoriesInDirectory(DirectoryPath, OutDirectories, bRecursive);
+}
+
+FString USuperToolsBlueprintLibrary::GetFileDir(const FString& FilePath)
+{
+	return FFileIOHelper::GetFileDirectory(FilePath);
+}
+
 // ==================== 截图 ====================
 
 bool USuperToolsBlueprintLibrary::CaptureViewportToFile(const FString& FilePath, bool bShowUI)
@@ -569,4 +617,46 @@ bool USuperToolsBlueprintLibrary::CaptureScreenToFile(const FString& FilePath)
 bool USuperToolsBlueprintLibrary::CaptureRegionToFile(const FString& FilePath, int32 X, int32 Y, int32 Width, int32 Height)
 {
 	return FScreenshotHelper::CaptureRegion(FilePath, X, Y, Width, Height);
+}
+
+// ==================== HTTP 请求 ====================
+
+void USuperToolsBlueprintLibrary::HttpGet(UObject* WorldContextObject, const FString& URL, FString& OutResponse, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+		if (LatentActionManager.FindExistingAction<FHttpGetLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+		{
+			LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID,
+				new FHttpGetLatentAction(URL, OutResponse, OutResponseCode, bOutSuccess, LatentInfo));
+		}
+	}
+}
+
+void USuperToolsBlueprintLibrary::HttpPost(UObject* WorldContextObject, const FString& URL, const FString& Content, const FString& ContentType, FString& OutResponse, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+		if (LatentActionManager.FindExistingAction<FHttpPostLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+		{
+			FString ActualContentType = ContentType.IsEmpty() ? TEXT("application/json") : ContentType;
+			LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID,
+				new FHttpPostLatentAction(URL, Content, ActualContentType, OutResponse, OutResponseCode, bOutSuccess, LatentInfo));
+		}
+	}
+}
+
+void USuperToolsBlueprintLibrary::HttpDownloadFile(UObject* WorldContextObject, const FString& URL, const FString& SavePath, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo)
+{
+	if (UWorld* World = GEngine->GetWorldFromContextObject(WorldContextObject, EGetWorldErrorMode::LogAndReturnNull))
+	{
+		FLatentActionManager& LatentActionManager = World->GetLatentActionManager();
+		if (LatentActionManager.FindExistingAction<FHttpDownloadLatentAction>(LatentInfo.CallbackTarget, LatentInfo.UUID) == nullptr)
+		{
+			LatentActionManager.AddNewAction(LatentInfo.CallbackTarget, LatentInfo.UUID,
+				new FHttpDownloadLatentAction(URL, SavePath, OutResponseCode, bOutSuccess, LatentInfo));
+		}
+	}
 }
