@@ -12,8 +12,12 @@ public class SuperTools : ModuleRules
 			new string[]
 			{
 				"Core",
+				"CoreUObject",
 				"SuperToolsLibrary",
-				"Projects"
+				"Projects",
+				"Slate",
+				"SlateCore",
+				"ApplicationCore"
 			}
 		);
 	}
