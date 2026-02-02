@@ -13,6 +13,7 @@ public class SuperTools : ModuleRules
 			{
 				"Core",
 				"CoreUObject",
+				"Engine",
 				"SuperToolsLibrary",
 				"Projects",
 				"Slate",

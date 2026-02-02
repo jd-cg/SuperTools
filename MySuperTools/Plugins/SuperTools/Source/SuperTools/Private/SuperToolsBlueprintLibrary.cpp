@@ -95,4 +95,53 @@ bool USuperToolsBlueprintLibrary::BringWindowToFront()
 	return FWindowsAPIHelper::BringWindowToFront(nullptr);
 }
 
+#else // Non-Windows platforms
+
+bool USuperToolsBlueprintLibrary::SetWindowTitle(const FString& Title)
+{
+	return false;
+}
+
+FString USuperToolsBlueprintLibrary::GetWindowTitle()
+{
+	return FString();
+}
+
+bool USuperToolsBlueprintLibrary::GetScreenResolution(int32& Width, int32& Height)
+{
+	Width = 0;
+	Height = 0;
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::SetWindowPosition(int32 X, int32 Y)
+{
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::SetWindowSize(int32 Width, int32 Height)
+{
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::MaximizeWindow()
+{
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::MinimizeWindow()
+{
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::RestoreWindow()
+{
+	return false;
+}
+
+bool USuperToolsBlueprintLibrary::BringWindowToFront()
+{
+	return false;
+}
+
 #endif // PLATFORM_WINDOWS
