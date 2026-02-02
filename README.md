@@ -27,12 +27,39 @@ SuperTools provides commonly used utility functions including INI file operation
 
 ### UDP Communication
 
-- Send UDP bytes and strings to specified IP:Port
-- Create async UDP listeners with buffer-based polling
-- Blueprint-friendly receive interface with `FUdpReceivedPacket` struct
-- Multiple listener management with handle-based API
-- Thread-safe implementation
-- Utility function to convert bytes to string
+**Send Functions:**
+
+- `UdpSendBytes` - Send byte array to IP:Port
+- `UdpSendString` - Send string message to IP:Port
+
+**Simplified Receive Interface (Recommended):**
+
+- `StartUdpReceive(Port)` - Start listening, returns handle
+- `GetUdpMessage(Handle)` - Get latest message as string (auto-clears buffer)
+- `GetAllUdpMessages(Handle)` - Get all messages as string array
+- `StopUdpReceive(Handle)` - Stop listening
+
+**Advanced Receive Interface:**
+
+- `CreateUdpListener(Port, BufferSize)` - Create listener with custom buffer
+- `HasUdpData(Handle)` - Check if data available
+- `GetAllUdpPackets(Handle)` - Get packets with sender info (`FUdpReceivedPacket`)
+- `BytesToString(Data)` - Convert byte array to string
+- `DestroyUdpListener(Handle)` - Destroy listener
+
+#### Blueprint Usage Example
+
+```
+// BeginPlay
+Handle = StartUdpReceive(Port: 8080)
+
+// Tick or Timer
+if GetUdpMessage(Handle, Message, SenderIP, SenderPort):
+    Print(Message)
+
+// EndPlay
+StopUdpReceive(Handle)
+```
 
 ### Serial Port Communication
 
