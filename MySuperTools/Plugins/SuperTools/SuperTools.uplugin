@@ -1,0 +1,24 @@
+{
+	"FileVersion": 3,
+	"Version": 1,
+	"VersionName": "1.0",
+	"FriendlyName": "SuperTools",
+	"Description": "虚幻引擎通用工具框架 - 提供INI文件操作、Win32 API封装等实用功能",
+	"Category": "Tools",
+	"CreatedBy": "lostpanda",
+	"CreatedByURL": "",
+	"DocsURL": "",
+	"MarketplaceURL": "",
+	"SupportURL": "",
+	"CanContainContent": true,
+	"IsBetaVersion": false,
+	"IsExperimentalVersion": false,
+	"Installed": false,
+	"Modules": [
+		{
+			"Name": "SuperTools",
+			"Type": "Runtime",
+			"LoadingPhase": "Default"
+		}
+	]
+}
