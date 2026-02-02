@@ -73,3 +73,28 @@ Plugins/**/Intermediate/*
 
 # Cache files for the editor to use
 DerivedDataCache/*
+
+# ==================== 项目特定规则 ====================
+
+# 主项目源代码 - 只提交插件代码
+MySuperTools/Source/
+
+# 项目配置和内容
+MySuperTools/Content/
+MySuperTools/Config/
+MySuperTools/*.uproject
+MySuperTools/*.code-workspace
+MySuperTools/.ignore
+
+# IDE 配置
+MySuperTools/.vscode/
+
+# 第三方库二进制文件
+MySuperTools/Plugins/SuperTools/Source/ThirdParty/
+MySuperTools/Plugins/SuperTools/Resources/
+
+# Claude Code 内部文件
+.claude/
+
+# 本地文档文件
+CLAUDE.md
