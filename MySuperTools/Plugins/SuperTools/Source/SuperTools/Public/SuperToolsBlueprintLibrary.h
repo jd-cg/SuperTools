@@ -10,6 +10,9 @@
 #include "Utils/FileDialogHelper.h"
 #include "Utils/SystemHelper.h"
 #include "Utils/DataHelper.h"
+#include "Utils/JsonHelper.h"
+#include "Utils/FileIOHelper.h"
+#include "Utils/ScreenshotHelper.h"
 #include "SuperToolsBlueprintLibrary.generated.h"
 
 /**
@@ -634,4 +637,213 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|Data", meta = (DisplayName = "SHA256 Hash File", Keywords = "sha256 hash file 哈希 文件"))
 	static bool SHA256HashFile(const FString& FilePath, FString& OutHash);
+
+	// ==================== JSON 操作 ====================
+
+	/**
+	 * 从 JSON 字符串获取字符串值
+	 * @param JsonString JSON 字符串
+	 * @param FieldName 字段名称 (支持点分隔的路径, 如 "data.user.name")
+	 * @param DefaultValue 默认值
+	 * @return 字段值
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "JSON Get String", Keywords = "json get string 获取 字符串"))
+	static FString JsonGetString(const FString& JsonString, const FString& FieldName, const FString& DefaultValue = TEXT(""));
+
+	/**
+	 * 从 JSON 字符串获取整数值
+	 * @param JsonString JSON 字符串
+	 * @param FieldName 字段名称 (支持点分隔的路径)
+	 * @param DefaultValue 默认值
+	 * @return 字段值
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "JSON Get Int", Keywords = "json get int 获取 整数"))
+	static int32 JsonGetInt(const FString& JsonString, const FString& FieldName, int32 DefaultValue = 0);
+
+	/**
+	 * 从 JSON 字符串获取浮点值
+	 * @param JsonString JSON 字符串
+	 * @param FieldName 字段名称 (支持点分隔的路径)
+	 * @param DefaultValue 默认值
+	 * @return 字段值
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "JSON Get Float", Keywords = "json get float 获取 浮点"))
+	static float JsonGetFloat(const FString& JsonString, const FString& FieldName, float DefaultValue = 0.0f);
+
+	/**
+	 * 从 JSON 字符串获取布尔值
+	 * @param JsonString JSON 字符串
+	 * @param FieldName 字段名称 (支持点分隔的路径)
+	 * @param DefaultValue 默认值
+	 * @return 字段值
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "JSON Get Bool", Keywords = "json get bool 获取 布尔"))
+	static bool JsonGetBool(const FString& JsonString, const FString& FieldName, bool DefaultValue = false);
+
+	/**
+	 * 从 JSON 字符串获取字符串数组
+	 * @param JsonString JSON 字符串
+	 * @param FieldName 字段名称 (支持点分隔的路径)
+	 * @param OutArray 输出数组
+	 * @return 是否获取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|JSON", meta = (DisplayName = "JSON Get String Array", Keywords = "json get string array 获取 字符串 数组"))
+	static bool JsonGetStringArray(const FString& JsonString, const FString& FieldName, TArray<FString>& OutArray);
+
+	/**
+	 * 创建简单的键值对 JSON 字符串
+	 * @param Key 键
+	 * @param Value 值
+	 * @return JSON 字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|JSON", meta = (DisplayName = "Make JSON String", Keywords = "json make create 创建"))
+	static FString MakeJsonString(const FString& Key, const FString& Value);
+
+	// ==================== 文件 I/O ====================
+
+	/**
+	 * 读取文本文件
+	 * @param FilePath 文件路径
+	 * @param OutContent 输出的文件内容
+	 * @return 是否读取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Read Text File", Keywords = "file read text 文件 读取 文本"))
+	static bool ReadTextFile(const FString& FilePath, FString& OutContent);
+
+	/**
+	 * 写入文本文件
+	 * @param FilePath 文件路径
+	 * @param Content 要写入的内容
+	 * @param bAppend 是否追加模式
+	 * @return 是否写入成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Write Text File", Keywords = "file write text 文件 写入 文本"))
+	static bool WriteTextFile(const FString& FilePath, const FString& Content, bool bAppend = false);
+
+	/**
+	 * 读取文本文件的所有行
+	 * @param FilePath 文件路径
+	 * @param OutLines 输出的行数组
+	 * @return 是否读取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Read Lines", Keywords = "file read lines 文件 读取 行"))
+	static bool ReadFileLines(const FString& FilePath, TArray<FString>& OutLines);
+
+	/**
+	 * 检查文件是否存在
+	 * @param FilePath 文件路径
+	 * @return 文件是否存在
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "File Exists", Keywords = "file exists 文件 存在"))
+	static bool DoesFileExist(const FString& FilePath);
+
+	/**
+	 * 检查目录是否存在
+	 * @param DirectoryPath 目录路径
+	 * @return 目录是否存在
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Directory Exists", Keywords = "directory exists 目录 存在"))
+	static bool DoesDirectoryExist(const FString& DirectoryPath);
+
+	/**
+	 * 创建目录 (包括所有父目录)
+	 * @param DirectoryPath 目录路径
+	 * @return 是否创建成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Create Directory", Keywords = "directory create 目录 创建"))
+	static bool CreateDirectoryPath(const FString& DirectoryPath);
+
+	/**
+	 * 删除文件
+	 * @param FilePath 文件路径
+	 * @return 是否删除成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Delete File", Keywords = "file delete 文件 删除"))
+	static bool DeleteFileAtPath(const FString& FilePath);
+
+	/**
+	 * 复制文件
+	 * @param SourcePath 源文件路径
+	 * @param DestPath 目标文件路径
+	 * @param bOverwrite 是否覆盖已存在的文件
+	 * @return 是否复制成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Copy File", Keywords = "file copy 文件 复制"))
+	static bool CopyFileToPath(const FString& SourcePath, const FString& DestPath, bool bOverwrite = true);
+
+	/**
+	 * 获取文件大小
+	 * @param FilePath 文件路径
+	 * @return 文件大小 (字节), 如果文件不存在返回 -1
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Get File Size", Keywords = "file size 文件 大小"))
+	static int64 GetFileSizeBytes(const FString& FilePath);
+
+	/**
+	 * 获取目录中的所有文件
+	 * @param DirectoryPath 目录路径
+	 * @param OutFiles 输出的文件路径数组
+	 * @param Extension 文件扩展名过滤 (可选, 如 "txt", 不带点)
+	 * @param bRecursive 是否递归搜索子目录
+	 * @return 是否获取成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|FileIO", meta = (DisplayName = "Get Files In Directory", Keywords = "directory files get 目录 文件 获取"))
+	static bool GetFilesInDir(const FString& DirectoryPath, TArray<FString>& OutFiles, const FString& Extension = TEXT(""), bool bRecursive = false);
+
+	/**
+	 * 获取文件扩展名
+	 * @param FilePath 文件路径
+	 * @return 扩展名 (不带点)
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Get File Extension", Keywords = "file extension 文件 扩展名"))
+	static FString GetFileExt(const FString& FilePath);
+
+	/**
+	 * 获取文件名 (不含路径)
+	 * @param FilePath 文件路径
+	 * @param bWithExtension 是否包含扩展名
+	 * @return 文件名
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|FileIO", meta = (DisplayName = "Get File Name", Keywords = "file name 文件名"))
+	static FString GetFileNameFromPath(const FString& FilePath, bool bWithExtension = true);
+
+	// ==================== 截图 ====================
+
+	/**
+	 * 截取游戏视口并保存到文件
+	 * @param FilePath 保存路径 (支持 PNG, BMP, JPG)
+	 * @param bShowUI 是否包含 UI
+	 * @return 是否截图成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Screenshot", meta = (DisplayName = "Capture Viewport", Keywords = "screenshot capture viewport 截图 视口"))
+	static bool CaptureViewportToFile(const FString& FilePath, bool bShowUI = true);
+
+	/**
+	 * 请求截图 (异步, 使用引擎截图系统)
+	 * @param FilePath 保存路径
+	 * @param bShowUI 是否包含 UI
+	 * @note 此方法是异步的, 截图会在下一帧完成
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Screenshot", meta = (DisplayName = "Request Screenshot", Keywords = "screenshot request 截图 请求"))
+	static void RequestScreenshotToFile(const FString& FilePath, bool bShowUI = true);
+
+	/**
+	 * 截取整个屏幕 (Windows 平台)
+	 * @param FilePath 保存路径
+	 * @return 是否截图成功 (非 Windows 平台返回 false)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Screenshot", meta = (DisplayName = "Capture Screen", Keywords = "screenshot capture screen 截图 屏幕"))
+	static bool CaptureScreenToFile(const FString& FilePath);
+
+	/**
+	 * 截取指定区域 (Windows 平台)
+	 * @param FilePath 保存路径
+	 * @param X 起始 X 坐标
+	 * @param Y 起始 Y 坐标
+	 * @param Width 宽度
+	 * @param Height 高度
+	 * @return 是否截图成功 (非 Windows 平台返回 false)
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|Screenshot", meta = (DisplayName = "Capture Region", Keywords = "screenshot capture region 截图 区域"))
+	static bool CaptureRegionToFile(const FString& FilePath, int32 X, int32 Y, int32 Width, int32 Height);
 };

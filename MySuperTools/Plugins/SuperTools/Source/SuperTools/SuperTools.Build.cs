@@ -22,7 +22,11 @@ public class SuperTools : ModuleRules
 				"Sockets",
 				"Networking",
 				"DesktopPlatform",
-				"ImageWrapper"
+				"ImageWrapper",
+				"Json",
+				"JsonUtilities",
+				"HTTP",
+				"RenderCore"
 			}
 		);
 	}
