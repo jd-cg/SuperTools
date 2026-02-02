@@ -18,7 +18,9 @@ public class SuperTools : ModuleRules
 				"Projects",
 				"Slate",
 				"SlateCore",
-				"ApplicationCore"
+				"ApplicationCore",
+				"Sockets",
+				"Networking"
 			}
 		);
 	}

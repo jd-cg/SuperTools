@@ -3,6 +3,8 @@
 #include "SuperToolsBlueprintLibrary.h"
 #include "Utils/IniFileHelper.h"
 #include "Utils/WindowsAPIHelper.h"
+#include "Utils/UdpHelper.h"
+#include "Utils/SerialPortHelper.h"
 
 // ==================== INI 文件操作 ====================
 
@@ -145,3 +147,72 @@ bool USuperToolsBlueprintLibrary::BringWindowToFront()
 }
 
 #endif // PLATFORM_WINDOWS
+
+// ==================== UDP 通信 ====================
+
+bool USuperToolsBlueprintLibrary::UdpSendBytes(const FString& IP, int32 Port, const TArray<uint8>& Data)
+{
+	return FUdpHelper::SendTo(IP, Port, Data);
+}
+
+bool USuperToolsBlueprintLibrary::UdpSendString(const FString& IP, int32 Port, const FString& Message)
+{
+	return FUdpHelper::SendStringTo(IP, Port, Message);
+}
+
+// ==================== 串口通信 ====================
+
+int32 USuperToolsBlueprintLibrary::OpenSerialPort(const FString& PortName, int32 BaudRate)
+{
+	return FSerialPortHelper::OpenPortSimple(PortName, BaudRate);
+}
+
+int32 USuperToolsBlueprintLibrary::OpenSerialPortWithConfig(const FString& PortName, const FSerialPortConfig& Config)
+{
+	return FSerialPortHelper::OpenPort(PortName, Config);
+}
+
+bool USuperToolsBlueprintLibrary::CloseSerialPort(int32 Handle)
+{
+	return FSerialPortHelper::ClosePort(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::IsSerialPortOpen(int32 Handle)
+{
+	return FSerialPortHelper::IsPortOpen(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::SerialWriteBytes(int32 Handle, const TArray<uint8>& Data)
+{
+	return FSerialPortHelper::Write(Handle, Data);
+}
+
+bool USuperToolsBlueprintLibrary::SerialWriteString(int32 Handle, const FString& Message)
+{
+	return FSerialPortHelper::WriteString(Handle, Message);
+}
+
+TArray<uint8> USuperToolsBlueprintLibrary::SerialReadBytes(int32 Handle, int32 MaxBytes)
+{
+	return FSerialPortHelper::Read(Handle, MaxBytes);
+}
+
+FString USuperToolsBlueprintLibrary::SerialReadString(int32 Handle, int32 MaxBytes)
+{
+	return FSerialPortHelper::ReadString(Handle, MaxBytes);
+}
+
+int32 USuperToolsBlueprintLibrary::GetSerialBytesAvailable(int32 Handle)
+{
+	return FSerialPortHelper::GetBytesAvailable(Handle);
+}
+
+bool USuperToolsBlueprintLibrary::FlushSerialBuffers(int32 Handle, bool bClearInput, bool bClearOutput)
+{
+	return FSerialPortHelper::FlushBuffers(Handle, bClearInput, bClearOutput);
+}
+
+TArray<FString> USuperToolsBlueprintLibrary::GetAvailableSerialPorts()
+{
+	return FSerialPortHelper::GetAvailablePorts();
+}

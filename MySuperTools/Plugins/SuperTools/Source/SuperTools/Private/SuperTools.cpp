@@ -5,6 +5,8 @@
 #include "Interfaces/IPluginManager.h"
 #include "Misc/Paths.h"
 #include "HAL/PlatformProcess.h"
+#include "Utils/UdpHelper.h"
+#include "Utils/SerialPortHelper.h"
 
 DEFINE_LOG_CATEGORY(LogSuperTools);
 
@@ -46,9 +48,17 @@ void FSuperToolsModule::ShutdownModule()
 	// This function may be called during shutdown to clean up your module.  For modules that support dynamic reloading,
 	// we call this function before unloading the module.
 
+	// 清理 UDP 监听器
+	FUdpHelper::DestroyAllListeners();
+
+	// 清理串口连接
+	FSerialPortHelper::CloseAllPorts();
+
 	// Free the dll handle
 	FPlatformProcess::FreeDllHandle(ExampleLibraryHandle);
 	ExampleLibraryHandle = nullptr;
+
+	UE_LOG(LogSuperTools, Log, TEXT("SuperTools 插件已关闭"));
 }
 
 #undef LOCTEXT_NAMESPACE

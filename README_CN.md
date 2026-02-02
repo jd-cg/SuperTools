@@ -27,6 +27,23 @@ SuperTools 提供常用的工具函数，包括 INI 文件操作和 Windows API 
 
 > **注意**: Windows API 函数仅在 Windows 平台有效。其他平台返回 false 或空值。
 
+### UDP 通信
+
+- 向指定 IP:Port 发送 UDP 字节和字符串
+- 创建带回调委托的异步 UDP 监听器
+- 基于句柄的多监听器管理
+- 线程安全实现
+
+### 串口通信
+
+- 完整的串口配置（波特率、数据位、奇偶校验、停止位、流控制）
+- 打开/关闭/读取/写入操作
+- 带回调委托的异步读取
+- 端口枚举（列出可用 COM 端口）
+- 缓冲区管理（清空、获取可用字节数）
+
+> **注意**: 串口功能仅在 Windows 平台完整支持。其他平台返回 false 或空值。
+
 ## 项目结构
 
 ```
@@ -39,7 +56,9 @@ MySuperTools/
 │       │   │   ├── SuperToolsBlueprintLibrary.h
 │       │   │   └── Utils/
 │       │   │       ├── IniFileHelper.h
-│       │   │       └── WindowsAPIHelper.h
+│       │   │       ├── WindowsAPIHelper.h
+│       │   │       ├── UdpHelper.h
+│       │   │       └── SerialPortHelper.h
 │       │   └── Private/
 │       └── ThirdParty/           # 第三方库集成
 └── Config/                       # 配置文件
@@ -66,6 +85,8 @@ MySuperTools/
 
 - `SuperTools|INI` - INI 文件操作
 - `SuperTools|Windows` - Windows API 函数
+- `SuperTools|UDP` - UDP 通信
+- `SuperTools|SerialPort` - 串口通信
 
 ### C++
 

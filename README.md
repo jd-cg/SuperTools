@@ -25,6 +25,23 @@ SuperTools provides commonly used utility functions including INI file operation
 
 > **Note**: Windows API functions only work on Windows platform. Other platforms return false or empty values.
 
+### UDP Communication
+
+- Send UDP bytes and strings to specified IP:Port
+- Create async UDP listeners with callback delegates
+- Multiple listener management with handle-based API
+- Thread-safe implementation
+
+### Serial Port Communication
+
+- Full serial port configuration (baud rate, data bits, parity, stop bits, flow control)
+- Open/close/read/write operations
+- Async reading with callback delegates
+- Port enumeration (list available COM ports)
+- Buffer management (flush, get available bytes)
+
+> **Note**: Serial port functions are fully supported on Windows platform only. Other platforms return false or empty values.
+
 ## Project Structure
 
 ```
@@ -37,7 +54,9 @@ MySuperTools/
 │       │   │   ├── SuperToolsBlueprintLibrary.h
 │       │   │   └── Utils/
 │       │   │       ├── IniFileHelper.h
-│       │   │       └── WindowsAPIHelper.h
+│       │   │       ├── WindowsAPIHelper.h
+│       │   │       ├── UdpHelper.h
+│       │   │       └── SerialPortHelper.h
 │       │   └── Private/
 │       └── ThirdParty/           # Third-party library integration
 └── Config/                       # Configuration files
@@ -61,8 +80,11 @@ MySuperTools/
 ### Blueprint
 
 All functions are available in Blueprints under the `SuperTools` category:
+
 - `SuperTools|INI` - INI file operations
 - `SuperTools|Windows` - Windows API functions
+- `SuperTools|UDP` - UDP communication
+- `SuperTools|SerialPort` - Serial port communication
 
 ### C++
 

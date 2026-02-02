@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Kismet/BlueprintFunctionLibrary.h"
+#include "Utils/SerialPortHelper.h"
 #include "SuperToolsBlueprintLibrary.generated.h"
 
 /**
@@ -178,4 +179,125 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|Windows", meta = (DisplayName = "窗口置顶", Keywords = "window front bring 窗口 置顶"))
 	static bool BringWindowToFront();
+
+	// ==================== UDP 通信 ====================
+	// 提供 UDP 数据发送功能
+
+	/**
+	 * 发送 UDP 字节数据
+	 * @param IP 目标 IP 地址
+	 * @param Port 目标端口
+	 * @param Data 要发送的字节数据
+	 * @return 是否发送成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "发送UDP字节", Keywords = "udp send bytes 发送 字节"))
+	static bool UdpSendBytes(const FString& IP, int32 Port, const TArray<uint8>& Data);
+
+	/**
+	 * 发送 UDP 字符串消息
+	 * @param IP 目标 IP 地址
+	 * @param Port 目标端口
+	 * @param Message 要发送的字符串消息
+	 * @return 是否发送成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|UDP", meta = (DisplayName = "发送UDP字符串", Keywords = "udp send string 发送 字符串"))
+	static bool UdpSendString(const FString& IP, int32 Port, const FString& Message);
+
+	// ==================== 串口通信 ====================
+	// 注意: 串口功能仅在 Windows 平台完整可用
+
+	/**
+	 * 打开串口 (简化版)
+	 * @param PortName 端口名称 (如 "COM1", "COM3")
+	 * @param BaudRate 波特率 (默认 9600)
+	 * @return 串口句柄, -1 表示打开失败
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "打开串口", Keywords = "serial port open 串口 打开"))
+	static int32 OpenSerialPort(const FString& PortName, int32 BaudRate = 9600);
+
+	/**
+	 * 打开串口 (完整配置)
+	 * @param PortName 端口名称
+	 * @param Config 串口配置
+	 * @return 串口句柄, -1 表示打开失败
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "打开串口(完整配置)", Keywords = "serial port open config 串口 打开 配置"))
+	static int32 OpenSerialPortWithConfig(const FString& PortName, const FSerialPortConfig& Config);
+
+	/**
+	 * 关闭串口
+	 * @param Handle 串口句柄
+	 * @return 是否关闭成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "关闭串口", Keywords = "serial port close 串口 关闭"))
+	static bool CloseSerialPort(int32 Handle);
+
+	/**
+	 * 检查串口是否打开
+	 * @param Handle 串口句柄
+	 * @return 是否打开
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|SerialPort", meta = (DisplayName = "串口是否打开", Keywords = "serial port open check 串口 打开 检查"))
+	static bool IsSerialPortOpen(int32 Handle);
+
+	/**
+	 * 向串口写入字节数据
+	 * @param Handle 串口句柄
+	 * @param Data 要写入的数据
+	 * @return 是否写入成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "串口写入字节", Keywords = "serial port write bytes 串口 写入 字节"))
+	static bool SerialWriteBytes(int32 Handle, const TArray<uint8>& Data);
+
+	/**
+	 * 向串口写入字符串
+	 * @param Handle 串口句柄
+	 * @param Message 要写入的字符串
+	 * @return 是否写入成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "串口写入字符串", Keywords = "serial port write string 串口 写入 字符串"))
+	static bool SerialWriteString(int32 Handle, const FString& Message);
+
+	/**
+	 * 从串口读取字节数据
+	 * @param Handle 串口句柄
+	 * @param MaxBytes 最大读取字节数
+	 * @return 读取到的数据
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "串口读取字节", Keywords = "serial port read bytes 串口 读取 字节"))
+	static TArray<uint8> SerialReadBytes(int32 Handle, int32 MaxBytes = 1024);
+
+	/**
+	 * 从串口读取字符串
+	 * @param Handle 串口句柄
+	 * @param MaxBytes 最大读取字节数
+	 * @return 读取到的字符串
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "串口读取字符串", Keywords = "serial port read string 串口 读取 字符串"))
+	static FString SerialReadString(int32 Handle, int32 MaxBytes = 1024);
+
+	/**
+	 * 获取串口接收缓冲区中的可用字节数
+	 * @param Handle 串口句柄
+	 * @return 可用字节数, -1 表示错误
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|SerialPort", meta = (DisplayName = "获取串口可用字节数", Keywords = "serial port bytes available 串口 可用 字节"))
+	static int32 GetSerialBytesAvailable(int32 Handle);
+
+	/**
+	 * 清空串口缓冲区
+	 * @param Handle 串口句柄
+	 * @param bClearInput 是否清空输入缓冲区
+	 * @param bClearOutput 是否清空输出缓冲区
+	 * @return 是否成功
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "清空串口缓冲区", Keywords = "serial port flush buffer 串口 清空 缓冲区"))
+	static bool FlushSerialBuffers(int32 Handle, bool bClearInput = true, bool bClearOutput = true);
+
+	/**
+	 * 获取系统中可用的串口列表
+	 * @return 可用串口名称列表
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|SerialPort", meta = (DisplayName = "获取可用串口列表", Keywords = "serial port list available 串口 列表 可用"))
+	static TArray<FString> GetAvailableSerialPorts();
 };
