@@ -88,6 +88,10 @@ MySuperTools/.ignore
 
 # IDE 配置
 MySuperTools/.vscode/
+MySuperTools/.clangd
+
+# Windows 系统文件
+MySuperTools/nul
 
 # 第三方库二进制文件
 MySuperTools/Plugins/SuperTools/Source/ThirdParty/
