@@ -2,194 +2,483 @@
 
 **[English](README.md) | [中文](README_CN.md)**
 
-基于 Unreal Engine 5.7 的通用工具框架插件。
+基于 Unreal Engine 5.7 的综合工具框架插件，为游戏开发提供常用功能函数。
 
 **作者**: lostpanda
 
+---
+
+## 目录
+
+- [概述](#概述)
+- [功能特性](#功能特性)
+  - [INI 文件操作](#ini-文件操作)
+  - [Windows API 封装](#windows-api-封装)
+  - [UDP 通信](#udp-通信)
+  - [串口通信](#串口通信)
+  - [剪贴板操作](#剪贴板操作)
+  - [文件对话框](#文件对话框)
+  - [系统操作](#系统操作)
+  - [数据处理](#数据处理)
+  - [JSON 操作](#json-操作)
+  - [文件 I/O 操作](#文件-io-操作)
+  - [截图操作](#截图操作)
+  - [HTTP 操作](#http-操作)
+- [项目结构](#项目结构)
+- [环境要求](#环境要求)
+- [安装](#安装)
+- [使用方法](#使用方法)
+- [构建命令](#构建命令)
+- [许可证](#许可证)
+
+---
+
 ## 概述
 
-SuperTools 提供游戏开发常用的工具函数，包括文件操作、网络通信、系统工具等。所有函数都支持蓝图调用，设计为易于扩展。
+SuperTools 是一个功能强大的工具插件，旨在简化 Unreal Engine 5.7 中常见的游戏开发任务。它提供了一套全面的蓝图可调用函数，涵盖文件操作、网络通信、系统工具等。
+
+**主要优势：**
+
+- 所有函数都支持蓝图调用，接口直观易用
+- 适用情况下支持跨平台
+- 易于扩展和自定义
+- API 文档完善，支持中文关键词搜索
+
+---
 
 ## 功能特性
 
 ### INI 文件操作
 
-- 读写字符串、整数、浮点数和布尔值
-- 跨平台支持（Windows 使用原生 API，其他平台使用手动解析）
-- 蓝图友好接口
+从 INI 文件读写配置值，支持跨平台。
+
+**蓝图分类：** `SuperTools|INI`
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `ReadIniString` | 从 INI 文件读取字符串 | `FilePath`, `Section`, `Key`, `DefaultValue` |
+| `ReadIniInt` | 从 INI 文件读取整数 | `FilePath`, `Section`, `Key`, `DefaultValue` |
+| `ReadIniFloat` | 从 INI 文件读取浮点数 | `FilePath`, `Section`, `Key`, `DefaultValue` |
+| `ReadIniBool` | 从 INI 文件读取布尔值 | `FilePath`, `Section`, `Key`, `DefaultValue` |
+| `WriteIniString` | 向 INI 文件写入字符串 | `FilePath`, `Section`, `Key`, `Value` |
+| `WriteIniInt` | 向 INI 文件写入整数 | `FilePath`, `Section`, `Key`, `Value` |
+| `WriteIniFloat` | 向 INI 文件写入浮点数 | `FilePath`, `Section`, `Key`, `Value` |
+| `WriteIniBool` | 向 INI 文件写入布尔值 | `FilePath`, `Section`, `Key`, `Value` |
+
+> **注意：** Windows 使用原生 API（`GetPrivateProfileString`/`WritePrivateProfileString`），其他平台使用手动解析。
+
+---
 
 ### Windows API 封装
 
-- 获取/设置窗口标题
-- 查询屏幕分辨率
-- 窗口位置和大小控制
-- 窗口状态管理（最大化、最小化、恢复、置顶）
+控制应用程序窗口属性和系统设置。
 
-> **注意**: Windows API 函数仅在 Windows 平台有效。其他平台返回 false 或空值。
+**蓝图分类：** `SuperTools|Windows`
+
+| 函数 | 描述 | 返回类型 |
+|------|------|----------|
+| `SetWindowTitle` | 设置应用程序窗口标题 | `bool` |
+| `GetWindowTitle` | 获取当前窗口标题 | `FString` |
+| `GetScreenResolution` | 获取屏幕宽度和高度 | `bool`（输出：Width, Height） |
+| `SetWindowPosition` | 设置窗口位置（X, Y） | `bool` |
+| `SetWindowSize` | 设置窗口尺寸（Width, Height） | `bool` |
+| `MaximizeWindow` | 最大化应用程序窗口 | `bool` |
+| `MinimizeWindow` | 最小化应用程序窗口 | `bool` |
+| `RestoreWindow` | 从最小化/最大化状态恢复窗口 | `bool` |
+| `BringWindowToFront` | 将窗口置于前台 | `bool` |
+
+> **平台说明：** 这些函数仅在 Windows 上有效。其他平台返回 `false` 或空值。
+
+---
 
 ### UDP 通信
 
-**发送功能:**
+通过 UDP 协议发送和接收数据，用于网络通信。
 
-- `UdpSendBytes` - 向 IP:Port 发送字节数组
-- `UdpSendString` - 向 IP:Port 发送字符串消息
+**蓝图分类：** `SuperTools|UDP`
 
-**简化接收接口 (推荐):**
+#### 发送函数
 
-- `StartUdpReceive(Port)` - 开始监听，返回句柄
-- `GetUdpMessage(Handle)` - 获取最新消息（字符串格式，自动清空缓冲区）
-- `GetAllUdpMessages(Handle)` - 获取所有消息（字符串数组）
-- `StopUdpReceive(Handle)` - 停止监听
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `UdpSendBytes` | 向 IP:Port 发送字节数组 | `IP`, `Port`, `Data` |
+| `UdpSendString` | 向 IP:Port 发送字符串消息 | `IP`, `Port`, `Message` |
 
-**高级接收接口:**
+#### 简化接收接口（推荐）
 
-- `CreateUdpListener(Port, BufferSize)` - 创建自定义缓冲区大小的监听器
-- `HasUdpData(Handle)` - 检查是否有数据
-- `GetAllUdpPackets(Handle)` - 获取包含发送方信息的数据包
-- `BytesToString(Data)` - 将字节数组转换为字符串
-- `DestroyUdpListener(Handle)` - 销毁监听器
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `StartUdpReceive` | 开始监听端口，返回句柄 | `Port` |
+| `GetUdpMessage` | 获取最新消息（自动清空缓冲区） | `Handle` → `OutMessage`, `OutSenderIP`, `OutSenderPort` |
+| `GetAllUdpMessages` | 获取所有消息（字符串数组） | `Handle` |
+| `StopUdpReceive` | 停止监听并释放资源 | `Handle` |
+
+#### 高级接收接口
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `CreateUdpListener` | 创建自定义缓冲区大小的监听器 | `Port`, `MaxBufferSize` |
+| `DestroyUdpListener` | 销毁监听器并释放资源 | `Handle` |
+| `IsUdpListenerValid` | 检查监听器句柄是否有效 | `Handle` |
+| `HasUdpData` | 检查是否有数据可用 | `Handle` |
+| `GetUdpPacketCount` | 获取已接收的数据包数量 | `Handle` |
+| `GetAllUdpPackets` | 获取所有数据包（含发送方信息） | `Handle` |
+| `GetLatestUdpPacket` | 获取最新的数据包 | `Handle` → `OutPacket` |
+| `ClearUdpBuffer` | 清空接收缓冲区 | `Handle` |
+| `BytesToString` | 将字节数组转换为 UTF-8 字符串 | `Data` |
+
+---
 
 ### 串口通信
 
-- 完整的串口配置（波特率、数据位、奇偶校验、停止位、流控制）
-- 打开/关闭/读取/写入操作
-- 端口枚举（列出可用 COM 端口）
-- 缓冲区管理（清空、获取可用字节数）
+完整的串口通信功能，用于硬件集成。
 
-> **注意**: 串口功能仅在 Windows 平台完整支持。
+**蓝图分类：** `SuperTools|SerialPort`
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `OpenSerialPort` | 使用默认设置打开端口 | `PortName`, `BaudRate`（默认：9600） |
+| `OpenSerialPortWithConfig` | 使用完整配置打开端口 | `PortName`, `Config`（结构体） |
+| `CloseSerialPort` | 关闭串口 | `Handle` |
+| `IsSerialPortOpen` | 检查端口是否打开 | `Handle` |
+| `SerialWriteBytes` | 向端口写入字节数组 | `Handle`, `Data` |
+| `SerialWriteString` | 向端口写入字符串 | `Handle`, `Message` |
+| `SerialReadBytes` | 从端口读取字节 | `Handle`, `MaxBytes` |
+| `SerialReadString` | 从端口读取字符串 | `Handle`, `MaxBytes` |
+| `GetSerialBytesAvailable` | 获取缓冲区中可用字节数 | `Handle` |
+| `FlushSerialBuffers` | 清空输入/输出缓冲区 | `Handle`, `bClearInput`, `bClearOutput` |
+| `GetAvailableSerialPorts` | 列出所有可用的 COM 端口 | - |
+
+**串口配置（FSerialPortConfig）：**
+
+- `BaudRate`：通信速率（9600、115200 等）
+- `DataBits`：每字节数据位（7、8）
+- `Parity`：奇偶校验（None、Odd、Even）
+- `StopBits`：停止位（1、1.5、2）
+- `FlowControl`：流控制（None、Hardware、Software）
+
+> **平台说明：** 串口功能仅在 Windows 平台完整支持。
+
+---
 
 ### 剪贴板操作
 
-- `CopyToClipboard` - 复制文本到剪贴板
-- `GetFromClipboard` - 从剪贴板获取文本
-- `HasClipboardText` - 检查剪贴板是否有文本
-- `ClearClipboard` - 清空剪贴板
-- `CopyImageToClipboard` - 复制图片文件到剪贴板（仅 Windows）
-- `GetImageFromClipboard` - 保存剪贴板图片到文件（仅 Windows）
-- `HasClipboardImage` - 检查剪贴板是否有图片（仅 Windows）
+复制和粘贴文本及图像到系统剪贴板。
 
-### 文件对话框操作
+**蓝图分类：** `SuperTools|Clipboard`
 
-- `OpenFileDialog` - 打开单文件选择对话框
-- `OpenFileDialogMultiple` - 打开多文件选择对话框
-- `SaveFileDialog` - 打开保存文件对话框
-- `OpenFolderDialog` - 打开文件夹选择对话框
+#### 文本操作
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `CopyToClipboard` | 复制文本到剪贴板 | `Text` |
+| `GetFromClipboard` | 从剪贴板获取文本 | → `OutText` |
+| `HasClipboardText` | 检查剪贴板是否有文本 | - |
+| `ClearClipboard` | 清空剪贴板内容 | - |
+
+#### 图像操作（仅 Windows）
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `CopyImageToClipboard` | 复制图像文件到剪贴板 | `ImagePath`（PNG、BMP、JPG） |
+| `GetImageFromClipboard` | 保存剪贴板图像到文件 | `SavePath` |
+| `HasClipboardImage` | 检查剪贴板是否有图像 | - |
+
+---
+
+### 文件对话框
+
+原生文件和文件夹选择对话框。
+
+**蓝图分类：** `SuperTools|FileDialog`
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `OpenFileDialog` | 单文件选择 | `DialogTitle`, `DefaultPath`, `FileTypes` → `OutFilePath` |
+| `OpenFileDialogMultiple` | 多文件选择 | `DialogTitle`, `DefaultPath`, `FileTypes` → `OutFilePaths` |
+| `SaveFileDialog` | 保存文件对话框 | `DialogTitle`, `DefaultPath`, `DefaultFileName`, `FileTypes` → `OutFilePath` |
+| `OpenFolderDialog` | 文件夹选择 | `DialogTitle`, `DefaultPath` → `OutFolderPath` |
+
+**文件类型格式示例：**
+
+```text
+All Files (*.*)|*.*|Text Files (*.txt)|*.txt|Images (*.png;*.jpg)|*.png;*.jpg
+```
+
+---
 
 ### 系统操作
 
-- `OpenURL` - 在默认浏览器中打开 URL
-- `OpenFolderInExplorer` - 在文件资源管理器中打开文件夹
-- `OpenFileWithDefaultApp` - 使用默认应用程序打开文件
-- `LaunchApplication` - 启动外部应用程序
-- `GetEnvVariable` - 获取环境变量
-- `GetFormattedTime` - 获取格式化的当前时间
-- `GetComputerName` - 获取计算机名称
-- `GetCurrentUserName` - 获取当前用户名
+系统工具和外部应用程序控制。
+
+**蓝图分类：** `SuperTools|System`
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `OpenURL` | 在默认浏览器中打开 URL | `URL` |
+| `OpenFolderInExplorer` | 在文件资源管理器中打开文件夹 | `FolderPath` |
+| `OpenFileWithDefaultApp` | 使用默认应用程序打开文件 | `FilePath` |
+| `LaunchApplication` | 启动外部应用程序 | `ExecutablePath`, `Arguments`, `bHidden` |
+| `GetEnvVariable` | 获取环境变量值 | `VariableName` |
+| `GetFormattedTime` | 获取格式化的当前时间 | `Format`（默认：`%Y-%m-%d %H:%M:%S`） |
+| `GetComputerName` | 获取计算机名/主机名 | - |
+| `GetCurrentUserName` | 获取当前用户名 | - |
+
+**时间格式说明符：**
+
+- `%Y` - 年份（4 位数字）
+- `%m` - 月份（01-12）
+- `%d` - 日期（01-31）
+- `%H` - 小时（00-23）
+- `%M` - 分钟（00-59）
+- `%S` - 秒（00-59）
+
+---
 
 ### 数据处理
 
-- `Base64Encode` / `Base64Decode` - Base64 编码/解码
-- `MD5Hash` / `MD5HashFile` - MD5 哈希计算
-- `SHA256Hash` / `SHA256HashFile` - SHA256 哈希计算（Windows 使用 CryptoAPI）
+编码、哈希和数据转换工具。
+
+**蓝图分类：** `SuperTools|Data`
+
+#### Base64 编码
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `Base64Encode` | 将字符串编码为 Base64 | `Input` |
+| `Base64Decode` | 解码 Base64 字符串 | `Input` → `OutDecoded` |
+
+#### 哈希函数
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `MD5Hash` | 计算字符串的 MD5 哈希值 | `Input` → 32 字符十六进制字符串 |
+| `MD5HashFile` | 计算文件的 MD5 哈希值 | `FilePath` → `OutHash` |
+| `SHA256Hash` | 计算字符串的 SHA256 哈希值 | `Input` → 64 字符十六进制字符串 |
+| `SHA256HashFile` | 计算文件的 SHA256 哈希值 | `FilePath` → `OutHash` |
+
+> **注意：** Windows 上的 SHA256 使用 CryptoAPI 以获得最佳性能。
+
+---
 
 ### JSON 操作
 
-- `JsonGetString` / `JsonGetInt` / `JsonGetFloat` / `JsonGetBool` - 从 JSON 获取值（支持嵌套路径如 "data.user.name"）
-- `JsonGetStringArray` - 从 JSON 获取字符串数组
-- `MakeJsonString` - 创建简单的键值对 JSON
-- `MapToJson` - 将 Map 转换为 JSON 字符串
-- `JsonToMap` - 将 JSON 字符串解析为 Map
+解析和创建 JSON 数据，支持嵌套路径。
+
+**蓝图分类：** `SuperTools|JSON`
+
+#### 读取值
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `JsonGetString` | 从 JSON 获取字符串值 | `JsonString`, `FieldName`, `DefaultValue` |
+| `JsonGetInt` | 从 JSON 获取整数值 | `JsonString`, `FieldName`, `DefaultValue` |
+| `JsonGetFloat` | 从 JSON 获取浮点值 | `JsonString`, `FieldName`, `DefaultValue` |
+| `JsonGetBool` | 从 JSON 获取布尔值 | `JsonString`, `FieldName`, `DefaultValue` |
+| `JsonGetStringArray` | 从 JSON 获取字符串数组 | `JsonString`, `FieldName` → `OutArray` |
+
+**嵌套路径支持：**
+
+```cpp
+// 使用点号访问嵌套值
+JsonGetString(JsonStr, "data.user.name", "Unknown")
+JsonGetInt(JsonStr, "response.items.0.id", 0)
+```
+
+#### 创建 JSON
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `MakeJsonString` | 创建简单的键值对 JSON | `Key`, `Value` |
+| `MapToJson` | 将 Map 转换为 JSON 字符串 | `StringMap`, `bPrettyPrint` |
+| `JsonToMap` | 将 JSON 解析为 Map | `JsonString` → `OutMap` |
+
+---
 
 ### 文件 I/O 操作
 
-- `ReadTextFile` / `WriteTextFile` - 读写文本文件
-- `ReadFileLines` / `WriteFileLines` - 按行读写文本文件
-- `ReadBinaryFile` / `WriteBinaryFile` - 读写二进制文件
-- `DoesFileExist` / `DoesDirectoryExist` - 检查文件/目录是否存在
-- `CreateDirectoryPath` - 创建目录（包括父目录）
-- `DeleteFileAtPath` / `DeleteDirectoryAtPath` - 删除文件/目录
-- `CopyFileToPath` / `MoveFileToPath` - 复制/移动文件
-- `GetFileSizeBytes` - 获取文件大小
-- `GetFilesInDir` / `GetDirectoriesInDir` - 列出文件/目录
-- `GetFileExt` / `GetFileNameFromPath` / `GetFileDir` - 路径工具函数
+全面的文件和目录操作。
+
+**蓝图分类：** `SuperTools|FileIO`
+
+#### 文本文件操作
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `ReadTextFile` | 读取整个文本文件 | `FilePath` → `OutContent` |
+| `WriteTextFile` | 写入文本到文件 | `FilePath`, `Content`, `bAppend` |
+| `ReadFileLines` | 按行读取文件 | `FilePath` → `OutLines` |
+| `WriteFileLines` | 按行写入文件 | `FilePath`, `Lines`, `bAppend` |
+
+#### 二进制文件操作
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `ReadBinaryFile` | 读取二进制文件 | `FilePath` → `OutData` |
+| `WriteBinaryFile` | 写入二进制文件 | `FilePath`, `Data` |
+
+#### 文件/目录检查
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `DoesFileExist` | 检查文件是否存在 | `FilePath` |
+| `DoesDirectoryExist` | 检查目录是否存在 | `DirectoryPath` |
+| `GetFileSizeBytes` | 获取文件大小（字节） | `FilePath` |
+
+#### 文件/目录管理
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `CreateDirectoryPath` | 创建目录（包括父目录） | `DirectoryPath` |
+| `DeleteFileAtPath` | 删除文件 | `FilePath` |
+| `DeleteDirectoryAtPath` | 删除目录及其内容 | `DirectoryPath` |
+| `CopyFileToPath` | 复制文件 | `SourcePath`, `DestPath`, `bOverwrite` |
+| `MoveFileToPath` | 移动/重命名文件 | `SourcePath`, `DestPath` |
+
+#### 目录列表
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `GetFilesInDir` | 列出目录中的文件 | `DirectoryPath`, `Extension`, `bRecursive` → `OutFiles` |
+| `GetDirectoriesInDir` | 列出子目录 | `DirectoryPath`, `bRecursive` → `OutDirectories` |
+
+#### 路径工具
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `GetFileExt` | 获取文件扩展名（不带点） | `FilePath` |
+| `GetFileNameFromPath` | 从路径获取文件名 | `FilePath`, `bWithExtension` |
+| `GetFileDir` | 从文件路径获取目录 | `FilePath` |
+
+---
 
 ### 截图操作
 
-- `CaptureViewportToFile` - 捕获游戏视口到文件
-- `RequestScreenshotToFile` - 请求异步截图（使用引擎截图系统）
-- `CaptureScreenToFile` - 捕获整个屏幕（仅 Windows）
-- `CaptureRegionToFile` - 捕获屏幕区域（仅 Windows）
+捕获游戏视口和屏幕区域。
 
-### HTTP 操作（异步/延迟）
+**蓝图分类：** `SuperTools|Screenshot`
 
-- `HttpGet` - 异步 HTTP GET 请求
-- `HttpPost` - 异步 HTTP POST 请求
-- `HttpDownloadFile` - 异步文件下载
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `CaptureViewportToFile` | 捕获游戏视口 | `FilePath`, `bShowUI` |
+| `RequestScreenshotToFile` | 异步截图（引擎系统） | `FilePath`, `bShowUI` |
+| `CaptureScreenToFile` | 捕获整个屏幕（Windows） | `FilePath` |
+| `CaptureRegionToFile` | 捕获屏幕区域（Windows） | `FilePath`, `X`, `Y`, `Width`, `Height` |
 
-> **注意**: HTTP 函数是延迟动作，在蓝图中异步执行。
+**支持的格式：** PNG、BMP、JPG（由文件扩展名决定）
+
+> **注意：** `CaptureScreenToFile` 和 `CaptureRegionToFile` 仅限 Windows 平台。
+
+---
+
+### HTTP 操作
+
+使用延迟动作的异步 HTTP 请求。
+
+**蓝图分类：** `SuperTools|HTTP`
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `HttpGet` | 异步 HTTP GET 请求 | `URL` → `OutResponse`, `OutResponseCode`, `bOutSuccess` |
+| `HttpPost` | 异步 HTTP POST 请求 | `URL`, `Content`, `ContentType` → `OutResponse`, `OutResponseCode`, `bOutSuccess` |
+| `HttpDownloadFile` | 异步文件下载 | `URL`, `SavePath` → `OutResponseCode`, `bOutSuccess` |
+
+> **注意：** 这些是延迟动作，在蓝图中异步执行。请求完成后执行流程继续。
+
+---
 
 ## 项目结构
 
 ```text
 MySuperTools/
-├── Source/MySuperTools/          # 主游戏模块
-├── Plugins/SuperTools/           # 插件模块
+├── Source/MySuperTools/              # 主游戏模块
+│   ├── MySuperTools.h/cpp            # 模块实现
+│   └── MySuperTools.Build.cs         # 构建配置
+├── Plugins/SuperTools/               # 插件模块
 │   └── Source/
-│       ├── SuperTools/           # 核心插件代码
+│       ├── SuperTools/               # 核心插件代码
 │       │   ├── Public/
-│       │   │   ├── SuperToolsBlueprintLibrary.h
-│       │   │   └── Utils/
-│       │   │       ├── IniFileHelper.h
-│       │   │       ├── WindowsAPIHelper.h
-│       │   │       ├── UdpHelper.h
-│       │   │       ├── SerialPortHelper.h
-│       │   │       ├── ClipboardHelper.h
-│       │   │       ├── FileDialogHelper.h
-│       │   │       ├── SystemHelper.h
-│       │   │       ├── DataHelper.h
-│       │   │       ├── JsonHelper.h
-│       │   │       ├── FileIOHelper.h
-│       │   │       ├── ScreenshotHelper.h
-│       │   │       ├── HttpHelper.h
-│       │   │       └── HttpLatentActions.h
-│       │   └── Private/
-│       └── ThirdParty/           # 第三方库集成
-└── Config/                       # 配置文件
+│       │   │   ├── SuperToolsBlueprintLibrary.h    # 主蓝图 API
+│       │   │   └── Utils/                          # 工具类
+│       │   │       ├── IniFileHelper.h             # INI 文件操作
+│       │   │       ├── WindowsAPIHelper.h          # Windows API 封装
+│       │   │       ├── UdpHelper.h                 # UDP 通信
+│       │   │       ├── SerialPortHelper.h          # 串口通信
+│       │   │       ├── ClipboardHelper.h           # 剪贴板操作
+│       │   │       ├── FileDialogHelper.h          # 文件对话框
+│       │   │       ├── SystemHelper.h              # 系统工具
+│       │   │       ├── DataHelper.h                # 数据处理
+│       │   │       ├── JsonHelper.h                # JSON 操作
+│       │   │       ├── FileIOHelper.h              # 文件 I/O
+│       │   │       ├── ScreenshotHelper.h          # 截图捕获
+│       │   │       ├── HttpHelper.h                # HTTP 工具
+│       │   │       └── HttpLatentActions.h         # HTTP 延迟动作
+│       │   └── Private/                            # 实现文件
+│       └── ThirdParty/                             # 第三方库集成
+│           └── SuperToolsLibrary/                  # 外部库支持
+├── Config/                           # 配置文件
+│   ├── DefaultEngine.ini             # 引擎配置
+│   ├── DefaultEditor.ini             # 编辑器偏好设置
+│   ├── DefaultGame.ini               # 游戏设置
+│   └── DefaultInput.ini              # 输入绑定
+└── Build.bat                         # 构建脚本（Windows）
 ```
+
+---
 
 ## 环境要求
 
-- Unreal Engine 5.7
-- Visual Studio 2022 (Windows)
-- Xcode (macOS)
-- GCC/Clang (Linux)
+- **引擎：** Unreal Engine 5.7
+- **IDE：**
+  - Visual Studio 2022（Windows）
+  - Xcode（macOS）
+  - GCC/Clang（Linux）
+- **平台：** Windows、macOS、Linux（部分功能仅限 Windows）
+
+---
 
 ## 安装
 
-1. 克隆仓库
-2. 使用 Unreal Engine 5.7 打开 `MySuperTools.uproject`
-3. 构建项目
+1. 克隆仓库：
+
+   ```bash
+   git clone https://github.com/your-repo/SuperTools.git
+   ```
+
+2. 使用 Unreal Engine 5.7 打开 `MySuperTools/MySuperTools.uproject`
+
+3. 构建项目（或让编辑器在首次启动时编译）
+
+4. 如果尚未启用，请启用 SuperTools 插件（编辑 → 插件 → SuperTools）
+
+---
 
 ## 使用方法
 
 ### 蓝图
 
-所有函数都可在蓝图中使用，位于 `SuperTools` 分类下：
+所有函数都可在蓝图中使用，位于 `SuperTools` 分类下。可使用英文或中文关键词搜索。
 
-- `SuperTools|INI` - INI 文件操作
-- `SuperTools|Windows` - Windows API 函数
-- `SuperTools|UDP` - UDP 通信
-- `SuperTools|SerialPort` - 串口通信
-- `SuperTools|Clipboard` - 剪贴板操作
-- `SuperTools|FileDialog` - 文件对话框操作
-- `SuperTools|System` - 系统操作
-- `SuperTools|Data` - 数据处理（Base64、MD5、SHA256）
-- `SuperTools|JSON` - JSON 操作
-- `SuperTools|FileIO` - 文件 I/O 操作
-- `SuperTools|Screenshot` - 截图操作
-- `SuperTools|HTTP` - HTTP 操作
+**蓝图分类：**
 
-### C++
+| 分类 | 描述 |
+|------|------|
+| `SuperTools\|INI` | INI 文件操作 |
+| `SuperTools\|Windows` | Windows API 函数 |
+| `SuperTools\|UDP` | UDP 通信 |
+| `SuperTools\|SerialPort` | 串口通信 |
+| `SuperTools\|Clipboard` | 剪贴板操作 |
+| `SuperTools\|FileDialog` | 文件对话框操作 |
+| `SuperTools\|System` | 系统操作 |
+| `SuperTools\|Data` | 数据处理（Base64、MD5、SHA256） |
+| `SuperTools\|JSON` | JSON 操作 |
+| `SuperTools\|FileIO` | 文件 I/O 操作 |
+| `SuperTools\|Screenshot` | 截图操作 |
+| `SuperTools\|HTTP` | HTTP 操作（异步） |
+
+### C++ 集成
+
+包含主头文件并直接调用函数：
 
 ```cpp
 #include "SuperToolsBlueprintLibrary.h"
@@ -202,32 +491,88 @@ FString Value = USuperToolsBlueprintLibrary::ReadIniString(
     TEXT("DefaultPlayer")
 );
 
-// 设置窗口标题
+// 设置窗口标题（仅 Windows）
 USuperToolsBlueprintLibrary::SetWindowTitle(TEXT("我的游戏"));
 
-// 读取 JSON 值
+// 使用嵌套路径读取 JSON 值
 FString Name = USuperToolsBlueprintLibrary::JsonGetString(
     JsonString,
     TEXT("data.user.name"),
     TEXT("Unknown")
 );
 
-// HTTP GET（在蓝图中使用延迟动作）
-// 在蓝图中使用 HttpGet 节点进行异步请求
+// 发送 UDP 消息
+USuperToolsBlueprintLibrary::UdpSendString(
+    TEXT("192.168.1.100"),
+    8080,
+    TEXT("来自 UE5 的问候!")
+);
+
+// 文件操作
+FString Content;
+if (USuperToolsBlueprintLibrary::ReadTextFile(TEXT("C:/data.txt"), Content))
+{
+    UE_LOG(LogTemp, Log, TEXT("文件内容: %s"), *Content);
+}
 ```
+
+---
 
 ## 构建命令
 
+使用提供的 `Build.bat` 脚本进行常见构建操作：
+
 ```bash
-# 构建编辑器版本 (Development)
+# 构建编辑器版本（Development）
 Build.bat  # 选择选项 1
 
-# 构建游戏版本 (Shipping)
+# 构建游戏版本（Shipping）
 Build.bat  # 选择选项 2
+
+# 构建游戏版本（Development）
+Build.bat  # 选择选项 3
+
+# 生成项目文件
+Build.bat  # 选择选项 4
 
 # 清理并重新构建
 Build.bat  # 选择选项 5
 ```
+
+### 手动构建命令
+
+```bash
+# 构建编辑器版本（Development）
+"C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\Build.bat" MySuperToolsEditor Win64 Development -Project="MySuperTools.uproject"
+
+# 为 Windows 打包（Shipping）
+"C:\Program Files\Epic Games\UE_5.7\Engine\Build\BatchFiles\RunUAT.bat" BuildCookRun -project="MySuperTools.uproject" -platform=Win64 -clientconfig=Shipping -cook -stage -pak -archive
+```
+
+---
+
+## 平台支持
+
+| 功能 | Windows | macOS | Linux |
+|------|---------|-------|-------|
+| INI 文件操作 | 原生 API | 未测试 | 未测试 |
+| 窗口管理 | 完整 | 不适用 | 不适用 |
+| UDP 通信 | 完整 | 未测试 | 未测试 |
+| 串口通信 | 完整 | 不适用 | 不适用 |
+| 剪贴板（文本） | 完整 | 未测试 | 未测试 |
+| 剪贴板（图像） | 完整 | 不适用 | 不适用 |
+| 文件对话框 | 完整 | 未测试 | 未测试 |
+| 系统操作 | 完整 | 未测试 | 未测试 |
+| 数据处理 | 完整 | 未测试 | 未测试 |
+| JSON 操作 | 完整 | 未测试 | 未测试 |
+| 文件 I/O | 完整 | 未测试 | 未测试 |
+| 截图（视口） | 完整 | 未测试 | 未测试 |
+| 截图（屏幕） | 完整 | 不适用 | 不适用 |
+| HTTP 操作 | 完整 | 未测试 | 未测试 |
+
+> **注意：** macOS 和 Linux 平台尚未测试。"不适用"表示该功能仅限 Windows 平台。
+
+---
 
 ## 许可证
 
