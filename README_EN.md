@@ -25,6 +25,7 @@ A comprehensive utility framework plugin for Unreal Engine 5.7, providing common
   - [File I/O Operations](#file-io-operations)
   - [Screenshot Operations](#screenshot-operations)
   - [HTTP Operations](#http-operations)
+  - [Hardware ID](#hardware-id)
 - [Project Structure](#project-structure)
 - [Requirements](#requirements)
 - [Installation](#installation)
@@ -70,6 +71,7 @@ graph TB
             C10[FileIOHelper]
             C11[ScreenshotHelper]
             C12[HttpHelper]
+            C13[HardwareIdHelper]
         end
 
         subgraph "ThirdParty"
@@ -97,6 +99,7 @@ graph TB
     B --> C10
     B --> C11
     B --> C12
+    B --> C13
     B --> D
 
     style B fill:#4a9eff,stroke:#333,stroke-width:2px,color:#fff
@@ -451,6 +454,57 @@ Asynchronous HTTP requests using Latent Actions.
 
 ---
 
+### Hardware ID
+
+Retrieve hardware unique identifiers for device identification and license verification.
+
+**Blueprint Category:** `SuperTools|HardwareID`
+
+#### Individual Hardware Information
+
+| Function | Description | Return Type |
+|----------|-------------|-------------|
+| `GetMotherboardSerial` | Get motherboard serial number | `FString` |
+| `GetMotherboardManufacturer` | Get motherboard manufacturer | `FString` |
+| `GetMotherboardProduct` | Get motherboard product name | `FString` |
+| `GetCpuId` | Get CPU processor ID | `FString` |
+| `GetCpuName` | Get CPU model name | `FString` |
+| `GetDiskSerial` | Get primary disk serial number | `FString` |
+| `GetMacAddress` | Get first network adapter MAC address | `FString` |
+| `GetAllMacAddresses` | Get all network adapter MAC addresses | `TArray<FString>` |
+| `GetBiosSerial` | Get BIOS serial number | `FString` |
+| `GetSystemUuid` | Get system UUID | `FString` |
+
+#### Hardware Fingerprint
+
+| Function | Description | Parameters |
+|----------|-------------|------------|
+| `GetHardwareFingerprint` | Get default hardware fingerprint (SHA256 hash) | - |
+| `GetCustomHardwareFingerprint` | Get custom hardware fingerprint | `bIncludeMotherboard`, `bIncludeCpu`, `bIncludeDisk`, `bIncludeMac`, `bIncludeBios` |
+| `GetHardwareInfoJson` | Get complete hardware info (JSON format) | - |
+
+**Default Fingerprint Combination:** Motherboard Serial + CPU ID + Disk Serial + MAC Address
+
+**JSON Output Example:**
+
+```json
+{
+  "motherboard_serial": "ABC123",
+  "motherboard_manufacturer": "ASUS",
+  "motherboard_product": "ROG STRIX",
+  "cpu_id": "BFEBFBFF000906EA",
+  "cpu_name": "Intel Core i7-9700K",
+  "disk_serial": "WD-WX12345",
+  "mac_address": "AA:BB:CC:DD:EE:FF",
+  "bios_serial": "XYZ789",
+  "system_uuid": "12345678-1234-1234-1234-123456789ABC"
+}
+```
+
+> **Platform Note:** Hardware ID functions are primarily effective on Windows. Other platforms return empty values.
+
+---
+
 ## Project Structure
 
 ```text
@@ -476,7 +530,8 @@ MySuperTools/
 │       │   │       ├── FileIOHelper.h              # File I/O
 │       │   │       ├── ScreenshotHelper.h          # Screenshot capture
 │       │   │       ├── HttpHelper.h                # HTTP utilities
-│       │   │       └── HttpLatentActions.h         # HTTP latent actions
+│       │   │       ├── HttpLatentActions.h         # HTTP latent actions
+│       │   │       └── HardwareIdHelper.h          # Hardware ID retrieval
 │       │   └── Private/                            # Implementation files
 │       └── ThirdParty/                             # Third-party library integration
 │           └── SuperToolsLibrary/                  # External library support
@@ -539,6 +594,7 @@ All functions are available in Blueprints under the `SuperTools` category. Use t
 | `SuperTools\|FileIO` | File I/O operations |
 | `SuperTools\|Screenshot` | Screenshot operations |
 | `SuperTools\|HTTP` | HTTP operations (async) |
+| `SuperTools\|HardwareID` | Hardware ID retrieval |
 
 ### C++ Integration
 
@@ -633,6 +689,7 @@ Build.bat  # Select option 5
 | Screenshot (Viewport) | Full | Untested | Untested |
 | Screenshot (Screen) | Full | N/A | N/A |
 | HTTP Operations | Full | Untested | Untested |
+| Hardware ID | Full | N/A | N/A |
 
 > **Note:** macOS and Linux platforms have not been tested yet. "N/A" indicates features that are Windows-only by design.
 

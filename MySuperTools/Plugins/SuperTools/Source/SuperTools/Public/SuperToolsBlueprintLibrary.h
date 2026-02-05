@@ -14,6 +14,7 @@
 #include "Utils/JsonHelper.h"
 #include "Utils/FileIOHelper.h"
 #include "Utils/ScreenshotHelper.h"
+#include "Utils/HardwareIdHelper.h"
 #include "SuperToolsBlueprintLibrary.generated.h"
 
 /**
@@ -966,4 +967,104 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "SuperTools|HTTP", meta = (DisplayName = "HTTP Download File", Keywords = "http download file 下载 文件", Latent, LatentInfo = "LatentInfo", WorldContext = "WorldContextObject"))
 	static void HttpDownloadFile(UObject* WorldContextObject, const FString& URL, const FString& SavePath, int32& OutResponseCode, bool& bOutSuccess, FLatentActionInfo LatentInfo);
+
+	// ==================== 硬件ID ====================
+	// 注意: 这些函数主要在 Windows 平台有效，其他平台返回空值
+
+	/**
+	 * 获取主板序列号
+	 * @return 主板序列号，失败返回空字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Motherboard Serial", Keywords = "hardware motherboard serial 硬件 主板 序列号"))
+	static FString GetMotherboardSerial();
+
+	/**
+	 * 获取主板制造商
+	 * @return 主板制造商名称
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Motherboard Manufacturer", Keywords = "hardware motherboard manufacturer 硬件 主板 制造商"))
+	static FString GetMotherboardManufacturer();
+
+	/**
+	 * 获取主板产品名称
+	 * @return 主板产品名称
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Motherboard Product", Keywords = "hardware motherboard product 硬件 主板 产品"))
+	static FString GetMotherboardProduct();
+
+	/**
+	 * 获取 CPU ID
+	 * @return CPU 处理器ID
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get CPU ID", Keywords = "hardware cpu id 硬件 处理器"))
+	static FString GetCpuId();
+
+	/**
+	 * 获取 CPU 名称
+	 * @return CPU 型号名称
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get CPU Name", Keywords = "hardware cpu name 硬件 处理器 名称"))
+	static FString GetCpuName();
+
+	/**
+	 * 获取主硬盘序列号
+	 * @return 硬盘序列号，失败返回空字符串
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Disk Serial", Keywords = "hardware disk serial 硬件 硬盘 序列号"))
+	static FString GetDiskSerial();
+
+	/**
+	 * 获取第一个网卡的 MAC 地址
+	 * @return MAC 地址 (格式: XX:XX:XX:XX:XX:XX)
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get MAC Address", Keywords = "hardware mac address 硬件 网卡 地址"))
+	static FString GetMacAddress();
+
+	/**
+	 * 获取所有网卡的 MAC 地址
+	 * @return MAC 地址数组
+	 */
+	UFUNCTION(BlueprintCallable, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get All MAC Addresses", Keywords = "hardware mac address all 硬件 网卡 地址 所有"))
+	static TArray<FString> GetAllMacAddresses();
+
+	/**
+	 * 获取 BIOS 序列号
+	 * @return BIOS 序列号
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get BIOS Serial", Keywords = "hardware bios serial 硬件 序列号"))
+	static FString GetBiosSerial();
+
+	/**
+	 * 获取系统 UUID
+	 * @return 系统 UUID
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get System UUID", Keywords = "hardware system uuid 硬件 系统"))
+	static FString GetSystemUuid();
+
+	/**
+	 * 获取硬件指纹 (基于多个硬件ID的组合哈希)
+	 * 组合: 主板序列号 + CPU ID + 硬盘序列号 + MAC 地址
+	 * @return SHA256 哈希值作为硬件指纹
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Hardware Fingerprint", Keywords = "hardware fingerprint 硬件 指纹 唯一"))
+	static FString GetHardwareFingerprint();
+
+	/**
+	 * 获取自定义硬件指纹
+	 * @param bIncludeMotherboard 是否包含主板信息
+	 * @param bIncludeCpu 是否包含 CPU 信息
+	 * @param bIncludeDisk 是否包含硬盘信息
+	 * @param bIncludeMac 是否包含 MAC 地址
+	 * @param bIncludeBios 是否包含 BIOS 信息
+	 * @return SHA256 哈希值作为硬件指纹
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Custom Hardware Fingerprint", Keywords = "hardware fingerprint custom 硬件 指纹 自定义"))
+	static FString GetCustomHardwareFingerprint(bool bIncludeMotherboard = true, bool bIncludeCpu = true, bool bIncludeDisk = true, bool bIncludeMac = true, bool bIncludeBios = false);
+
+	/**
+	 * 获取完整的硬件信息 (JSON 格式)
+	 * @return JSON 字符串包含所有硬件信息
+	 */
+	UFUNCTION(BlueprintPure, Category = "SuperTools|HardwareID", meta = (DisplayName = "Get Hardware Info JSON", Keywords = "hardware info json 硬件 信息"))
+	static FString GetHardwareInfoJson();
 };

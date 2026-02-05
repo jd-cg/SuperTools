@@ -25,6 +25,7 @@
   - [文件 I/O 操作](#文件-io-操作)
   - [截图操作](#截图操作)
   - [HTTP 操作](#http-操作)
+  - [硬件ID](#硬件id)
 - [项目结构](#项目结构)
 - [环境要求](#环境要求)
 - [安装](#安装)
@@ -71,6 +72,7 @@ graph TB
             C10[FileIOHelper]
             C11[ScreenshotHelper]
             C12[HttpHelper]
+            C13[HardwareIdHelper]
         end
 
         subgraph "第三方库"
@@ -98,6 +100,7 @@ graph TB
     B --> C10
     B --> C11
     B --> C12
+    B --> C13
     B --> D
 
     style B fill:#4a9eff,stroke:#333,stroke-width:2px,color:#fff
@@ -456,6 +459,57 @@ JsonGetInt(JsonStr, "response.items.0.id", 0)
 
 ---
 
+### 硬件ID
+
+获取硬件唯一标识符，用于设备识别和授权验证。
+
+**蓝图分类：** `SuperTools|HardwareID`
+
+#### 单项硬件信息
+
+| 函数 | 描述 | 返回类型 |
+|------|------|----------|
+| `GetMotherboardSerial` | 获取主板序列号 | `FString` |
+| `GetMotherboardManufacturer` | 获取主板制造商 | `FString` |
+| `GetMotherboardProduct` | 获取主板产品名称 | `FString` |
+| `GetCpuId` | 获取 CPU 处理器ID | `FString` |
+| `GetCpuName` | 获取 CPU 型号名称 | `FString` |
+| `GetDiskSerial` | 获取主硬盘序列号 | `FString` |
+| `GetMacAddress` | 获取第一个网卡的 MAC 地址 | `FString` |
+| `GetAllMacAddresses` | 获取所有网卡的 MAC 地址 | `TArray<FString>` |
+| `GetBiosSerial` | 获取 BIOS 序列号 | `FString` |
+| `GetSystemUuid` | 获取系统 UUID | `FString` |
+
+#### 硬件指纹
+
+| 函数 | 描述 | 参数 |
+|------|------|------|
+| `GetHardwareFingerprint` | 获取默认硬件指纹（SHA256 哈希） | - |
+| `GetCustomHardwareFingerprint` | 获取自定义硬件指纹 | `bIncludeMotherboard`, `bIncludeCpu`, `bIncludeDisk`, `bIncludeMac`, `bIncludeBios` |
+| `GetHardwareInfoJson` | 获取完整硬件信息（JSON 格式） | - |
+
+**默认硬件指纹组合：** 主板序列号 + CPU ID + 硬盘序列号 + MAC 地址
+
+**JSON 输出示例：**
+
+```json
+{
+  "motherboard_serial": "ABC123",
+  "motherboard_manufacturer": "ASUS",
+  "motherboard_product": "ROG STRIX",
+  "cpu_id": "BFEBFBFF000906EA",
+  "cpu_name": "Intel Core i7-9700K",
+  "disk_serial": "WD-WX12345",
+  "mac_address": "AA:BB:CC:DD:EE:FF",
+  "bios_serial": "XYZ789",
+  "system_uuid": "12345678-1234-1234-1234-123456789ABC"
+}
+```
+
+> **平台说明：** 硬件ID功能主要在 Windows 平台有效。其他平台返回空值。
+
+---
+
 ## 项目结构
 
 ```text
@@ -481,7 +535,8 @@ MySuperTools/
 │       │   │       ├── FileIOHelper.h              # 文件 I/O
 │       │   │       ├── ScreenshotHelper.h          # 截图捕获
 │       │   │       ├── HttpHelper.h                # HTTP 工具
-│       │   │       └── HttpLatentActions.h         # HTTP 延迟动作
+│       │   │       ├── HttpLatentActions.h         # HTTP 延迟动作
+│       │   │       └── HardwareIdHelper.h          # 硬件ID获取
 │       │   └── Private/                            # 实现文件
 │       └── ThirdParty/                             # 第三方库集成
 │           └── SuperToolsLibrary/                  # 外部库支持
@@ -544,6 +599,7 @@ MySuperTools/
 | `SuperTools\|FileIO` | 文件 I/O 操作 |
 | `SuperTools\|Screenshot` | 截图操作 |
 | `SuperTools\|HTTP` | HTTP 操作（异步） |
+| `SuperTools\|HardwareID` | 硬件ID获取 |
 
 ### C++ 集成
 
@@ -638,6 +694,7 @@ Build.bat  # 选择选项 5
 | 截图（视口） | 完整 | 未测试 | 未测试 |
 | 截图（屏幕） | 完整 | 不适用 | 不适用 |
 | HTTP 操作 | 完整 | 未测试 | 未测试 |
+| 硬件ID | 完整 | 不适用 | 不适用 |
 
 > **注意：** macOS 和 Linux 平台尚未测试。"不适用"表示该功能仅限 Windows 平台。
 

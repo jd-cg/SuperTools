@@ -13,6 +13,7 @@
 #include "Utils/FileIOHelper.h"
 #include "Utils/ScreenshotHelper.h"
 #include "Utils/HttpLatentActions.h"
+#include "Utils/HardwareIdHelper.h"
 #include "Engine/Engine.h"
 #include "Engine/World.h"
 
@@ -659,4 +660,71 @@ void USuperToolsBlueprintLibrary::HttpDownloadFile(UObject* WorldContextObject, 
 				new FHttpDownloadLatentAction(URL, SavePath, OutResponseCode, bOutSuccess, LatentInfo));
 		}
 	}
+}
+
+// ==================== 硬件ID ====================
+
+FString USuperToolsBlueprintLibrary::GetMotherboardSerial()
+{
+	return FHardwareIdHelper::GetMotherboardSerial();
+}
+
+FString USuperToolsBlueprintLibrary::GetMotherboardManufacturer()
+{
+	return FHardwareIdHelper::GetMotherboardManufacturer();
+}
+
+FString USuperToolsBlueprintLibrary::GetMotherboardProduct()
+{
+	return FHardwareIdHelper::GetMotherboardProduct();
+}
+
+FString USuperToolsBlueprintLibrary::GetCpuId()
+{
+	return FHardwareIdHelper::GetCpuId();
+}
+
+FString USuperToolsBlueprintLibrary::GetCpuName()
+{
+	return FHardwareIdHelper::GetCpuName();
+}
+
+FString USuperToolsBlueprintLibrary::GetDiskSerial()
+{
+	return FHardwareIdHelper::GetDiskSerial();
+}
+
+FString USuperToolsBlueprintLibrary::GetMacAddress()
+{
+	return FHardwareIdHelper::GetMacAddress();
+}
+
+TArray<FString> USuperToolsBlueprintLibrary::GetAllMacAddresses()
+{
+	return FHardwareIdHelper::GetAllMacAddresses();
+}
+
+FString USuperToolsBlueprintLibrary::GetBiosSerial()
+{
+	return FHardwareIdHelper::GetBiosSerial();
+}
+
+FString USuperToolsBlueprintLibrary::GetSystemUuid()
+{
+	return FHardwareIdHelper::GetSystemUuid();
+}
+
+FString USuperToolsBlueprintLibrary::GetHardwareFingerprint()
+{
+	return FHardwareIdHelper::GetHardwareFingerprint();
+}
+
+FString USuperToolsBlueprintLibrary::GetCustomHardwareFingerprint(bool bIncludeMotherboard, bool bIncludeCpu, bool bIncludeDisk, bool bIncludeMac, bool bIncludeBios)
+{
+	return FHardwareIdHelper::GetCustomHardwareFingerprint(bIncludeMotherboard, bIncludeCpu, bIncludeDisk, bIncludeMac, bIncludeBios);
+}
+
+FString USuperToolsBlueprintLibrary::GetHardwareInfoJson()
+{
+	return FHardwareIdHelper::GetHardwareInfoJson();
 }
